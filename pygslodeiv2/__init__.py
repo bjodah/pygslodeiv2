@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division
+from __future__ import division, absolute_import
 
-from _gslodeiv2_numpy import integrate_adaptive as _integrate_adaptive
+from ._gslodeiv2_numpy import integrate_adaptive as _integrate_adaptive
+from .release import __version__
 
 import numpy as np
 
