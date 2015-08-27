@@ -1,4 +1,4 @@
-image: bjodah/dockerfile-bjodah-scicomp
+image: bjodah/dockerfile-bjodah-scicomp:14.04a
 git:
     path: github.com/bjodah/pygslodeiv2
 script:
