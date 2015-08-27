@@ -1,0 +1,11 @@
+image: bjodah/dockerfile-bjodah-scicomp
+git:
+    path: github.com/bjodah/pygslodeiv2
+script:
+  - if [[ "$DRONE_BRANCH" =~ ^v[0-9]+.[0-9]?* ]]; then export PYGSLODEIV2_RELEASE_VERSION=$DRONE_BRANCH; echo ${PYGSLODEIV2_RELEASE_VERSION} | tail -c +2 > __conda_version__.txt; fi
+  - python2 setup.py build_ext --inplace
+  - python3 setup.py build_ext --inplace
+  - PYTHONPATH=$(pwd) python2 -m pytest
+  - PYTHONPATH=$(pwd) python3 -m pytest
+  - python2 setup.py sdist
+  - scp dist/* pygslodeiv2@hera.physchem.kth.se:~/
