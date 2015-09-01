@@ -6,9 +6,11 @@ pygslodeiv2
    :target: http://hera.physchem.kth.se:8080/github.com/bjodah/pygslodeiv2
    :alt: Build status
 
-``pygslodeiv2`` provides a `Python <http://www.python.org>`_ binding to the odeiv2 interface of
-`GSL - GNU Scientific Library <http://www.gnu.org/software/gsl/>`_. The odeiv2 interface
-allows a user to numerically integrate (systems of) differential equations.
+``pygslodeiv2`` provides a `Python <http://www.python.org>`_ binding to the
+`Ordinary Differential Equation <https://en.wikipedia.org/wiki/Ordinary_differential_equation>`_
+integration routines exposed by the `odeiv2 interface <https://www.gnu.org/software/gsl/manual/html_node/Ordinary-Differential-Equations.html>`_ of
+`GSL - GNU Scientific Library <http://www.gnu.org/software/gsl/>`_.
+The odeiv2 interface allows a user to numerically integrate (systems of) differential equations.
 
 Example
 =======
@@ -32,6 +34,9 @@ The classic van der Pol oscillator (see `examples/van_der_pol.py <examples/van_d
    ...
    >>> y0 = [1, 0]; tend=10.0; dt0=1e-8; t0=0.0; atol=1e-8; rtol=1e-8
    >>> tout, yout = integrate_adaptive(f, j, 2, y0, t0, tend, atol, rtol, dt0)
+
+
+.. image:: examples/van_der_pol.png
 
 
 License
