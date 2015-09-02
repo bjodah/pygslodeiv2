@@ -3,10 +3,9 @@
 from __future__ import division, absolute_import
 
 from ._gslodeiv2_numpy import adaptive, predefined
-from .release import __version__
 from ._util import _check_callable, _check_indexing
-
-import numpy as np
+from .release import __version__
+assert __version__  # silence pyflakes
 
 
 def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
@@ -57,6 +56,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         _check_indexing(rhs, jac, x0, y0)
 
     return adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol, **kwargs)
+
 
 def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
                          check_callable=True, check_indexing=True, **kwargs):

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from pygslodeiv2 import integrate_adaptive
+from pygslodeiv2 import integrate_adaptive, integrate_predefined
 
 
 def get_f_and_j(mu):

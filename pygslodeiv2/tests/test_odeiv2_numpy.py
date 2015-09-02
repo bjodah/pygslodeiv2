@@ -53,6 +53,7 @@ methods = [('bsimp', 3e-4), ('msadams', 5), ('rkf45', 0.5), ('rkck', 0.3),
            ('rk8pd', 0.04), ('rk4imp', 0.8), ('msbdf', 23)]
 # ['rk2', 'rk4', 'rk1imp', 'rk2imp']
 
+
 @pytest.mark.parametrize("method,forgiveness", methods)
 def test_integrate_adaptive(method, forgiveness):
     k = k0, k1, k2 = 2.0, 3.0, 4.0
@@ -60,7 +61,8 @@ def test_integrate_adaptive(method, forgiveness):
     f, j = _get_f_j(k)
     x0, xend, dx0 = 0, 3, 1e-10
     atol, rtol = 1e-8, 1e-8
-    xout, yout = integrate_adaptive(f, j, y0, x0, xend, dx0, atol, rtol, method=method)
+    xout, yout = integrate_adaptive(f, j, y0, x0, xend, dx0, atol, rtol,
+                                    method=method)
     yref = decay_get_Cref(k, y0, xout)
     assert np.allclose(yout, yref,
                        rtol=forgiveness*rtol,
