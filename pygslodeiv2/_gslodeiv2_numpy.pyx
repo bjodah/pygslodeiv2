@@ -18,16 +18,27 @@ cdef class GslOdeiv2:
     def __dealloc__(self):
         del self.thisptr
 
-    def integrate_adaptive(self,
-                           cnp.ndarray[cnp.float64_t, ndim=1] y0,
-                           double t0, double tend,
-                           double atol, double rtol,
-                           double hstart=0.0, int step_type_idx=8):
+    def adaptive(self, cnp.ndarray[cnp.float64_t, ndim=1] y0,
+                 double t0, double tend,
+                 double atol, double rtol,
+                 double hstart=0.0, int step_type_idx=8):
         if y0.size < self.thisptr.ny:
             raise ValueError("y0 too short")
-        return self.thisptr.integrate_adaptive(<PyObject*>y0, t0, tend, atol, rtol,
-                                               hstart, step_type_idx)
+        return self.thisptr.adaptive(<PyObject*>y0, t0, tend, atol,
+                                     rtol, hstart, step_type_idx)
 
+    def predefined(self, cnp.ndarray[cnp.float64_t, ndim=1] y0,
+                   cnp.ndarray[cnp.float64_t, ndim=1] xout,
+                   double dx0, double atol, double rtol,
+                   int step_type_idx=8, double dx_max=0, double dx_min=0):
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((xout.size, y0.size),
+                                                                dtype=np.float64)
+        if y0.size < self.thisptr.ny:
+            raise ValueError("y0 too short")
+        yout[0, :] = y0
+        self.thisptr.predefined(<PyObject*>y0, <PyObject*>xout, <PyObject*> yout,
+                                dx0, atol, rtol, step_type_idx, dx_max, dx_min)
+        return yout
 
     def get_xout(self, size_t nsteps):
         cdef cnp.ndarray[cnp.float64_t, ndim=1] xout = np.empty(nsteps, dtype=np.float64)
@@ -51,9 +62,16 @@ step_type_indices = ['rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
                      'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf']
 
 
-def integrate_adaptive(f, j, ny, y0, x0, xend, atol, rtol, dx0, step_type='bsimp'):
+def adaptive(f, j, y0, x0, xend, dx0, atol, rtol, method='bsimp'):
     cdef size_t nsteps
-    integr = GslOdeiv2(f, j, ny)
-    nsteps = integr.integrate_adaptive(np.asarray(y0, dtype=np.float64), x0, xend, atol, rtol, dx0,
-                                       step_type_indices.index(step_type))
+    integr = GslOdeiv2(f, j, len(y0))
+    nsteps = integr.adaptive(np.asarray(y0, dtype=np.float64), x0, xend, dx0, atol, rtol,
+                             step_type_indices.index(method))
     return integr.get_xout(nsteps), integr.get_yout(nsteps)
+
+
+def predefined(f, j, y0, xout, dx0, atol, rtol, method='bsimp'):
+    integr = GslOdeiv2(f, j, len(y0))
+    return integr.predefined(np.asarray(y0, dtype=np.float64),
+                             np.asarray(xout, dtype=np.float64),
+                             dx0, atol, rtol, step_type_indices.index(method))

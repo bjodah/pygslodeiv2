@@ -10,6 +10,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
 
+
 namespace gslodeiv2{
     const gsl_odeiv2_step_type * get_step_type(int index){
         switch(index){
@@ -41,22 +42,29 @@ namespace gslodeiv2{
     }
     // typedef int (*RhsFn)(double t, const double y[], double dydt[], void *params);
     // typedef int (*JacFn)(double t, const double y[], double *dfdy, double dfdt[], void *params);
-    // struct System : gsl_odeiv2_system {
-    //     System() : gsl_odeiv2_system() {}
-    // };
-    using System = gsl_odeiv2_system;
+    int rhs(double t, const double y[], double f[], void * params);
+    int jac(double x, const double y[], double *dfdy, double dfdt[], void *params);
+
+    struct System : gsl_odeiv2_system {
+        gsl_odeiv2_system m_sys;
+        System(size_t ny, void *params) : m_sys({rhs, jac, ny, params}) {}
+    };
     struct Driver {
         gsl_odeiv2_driver *m_driver;
         Driver(const int step_type_idx, const size_t dim,
-               const System sys, const double hstart,
-               const double epsabs, const double epsrel,
-               const double a_y=1, const double a_dydt=0,
-               const double scale_abs[]=nullptr) :
-            m_driver((scale_abs == nullptr) ?
-                     gsl_odeiv2_driver_alloc_standard_new(&sys, get_step_type(step_type_idx),
-                                                          hstart, epsabs, epsrel, a_y, a_dydt) :
-                     gsl_odeiv2_driver_alloc_scaled_new(&sys, get_step_type(step_type_idx), hstart,
-                                                        epsabs, epsrel, a_y, a_dydt, scale_abs)) {}
+               const System& sys, const double hstart,
+               const double epsabs, const double epsrel //,
+               ) : m_driver(gsl_odeiv2_driver_alloc_y_new(&sys.m_sys, get_step_type(step_type_idx),
+                                                          hstart, epsabs, epsrel))
+               //               const double a_y=1, const double a_dydt=0,
+               //const double scale_abs[]=nullptr) :
+            // m_driver((scale_abs == nullptr) ?
+            //          gsl_odeiv2_driver_alloc_standard_new(&sys.m_sys, get_step_type(step_type_idx),
+            //                                               hstart, epsabs, epsrel, a_y, a_dydt) :
+            //          gsl_odeiv2_driver_alloc_scaled_new(&sys.m_sys, get_step_type(step_type_idx),
+            //                                             hstart, epsabs, epsrel, a_y, a_dydt,
+            //                                             scale_abs))
+               {}
         ~Driver() { gsl_odeiv2_driver_free(this->m_driver); }
         int set_hmin(double hmin) { return gsl_odeiv2_driver_set_hmin(m_driver, hmin); }
         int set_hmax(double hmax) { return gsl_odeiv2_driver_set_hmax(m_driver, hmax); }
@@ -74,10 +82,10 @@ namespace gslodeiv2{
         ~Step() { gsl_odeiv2_step_free(m_step); }
         int reset() { return gsl_odeiv2_step_reset(m_step); }
         unsigned int order() { return gsl_odeiv2_step_order(m_step); }
-        int set_driver(Driver& d) { gsl_odeiv2_step_set_driver(m_step, d.m_driver); }
+        int set_driver(Driver& d) { return gsl_odeiv2_step_set_driver(m_step, d.m_driver); }
         int apply(double t, double h, double y[], double yerr[], const double dydt_in[],
-                  double dydt_out[], const System sys) {
-            return gsl_odeiv2_step_apply(m_step, t, h, y, yerr, dydt_in, dydt_out, &sys);
+                  double dydt_out[], const System& sys) {
+            return gsl_odeiv2_step_apply(m_step, t, h, y, yerr, dydt_in, dydt_out, &sys.m_sys);
         }
     };
     struct Control {
@@ -89,8 +97,9 @@ namespace gslodeiv2{
                       gsl_odeiv2_control_scaled_new(eps_abs, eps_rel, a_y,
                                                     a_dydt, scale_abs, dim)) {}
         ~Control() { gsl_odeiv2_control_free(m_control); }
+        int set_driver(Driver& d) { return gsl_odeiv2_control_set_driver(m_control, d.m_driver); }
         int init(Control& c, double eps_abs, double eps_rel, double a_y, double a_dydt){
-            gsl_odeiv2_control_init(m_control, eps_abs, eps_rel, a_y, a_dydt);
+            return gsl_odeiv2_control_init(m_control, eps_abs, eps_rel, a_y, a_dydt);
         }
         int hadjust(Step& s, const double y[], const double yerr[], const double dydt[], double *h){
             return gsl_odeiv2_control_hadjust(m_control, s.m_step, y, yerr, dydt, h);
@@ -100,38 +109,39 @@ namespace gslodeiv2{
         gsl_odeiv2_evolve *m_evolve;
         Evolve(size_t dim) : m_evolve(gsl_odeiv2_evolve_alloc(dim)) {}
         ~Evolve() { gsl_odeiv2_evolve_free(this->m_evolve); }
-        int apply(Control& con, Step& step, System sys, double *t,
+        int set_driver(Driver& d) { return gsl_odeiv2_evolve_set_driver(m_evolve, d.m_driver); }
+        int apply(Control& con, Step& step, System& sys, double *t,
                   double t1, double *h, double y[]) {
-            gsl_odeiv2_evolve_apply(m_evolve, con.m_control, step.m_step, &sys, t, t1, h, y);
+            return gsl_odeiv2_evolve_apply(m_evolve, con.m_control, step.m_step,
+                                           &sys.m_sys, t, t1, h, y);
         }
         int reset() { return gsl_odeiv2_evolve_reset(m_evolve); }
     };
 
-    int func(double t, const double y[], double f[], void * params);
-    int jac(double x, const double y[], double *dfdy, double dfdt[], void *params);
-
     class PyGslOdeiv2 {
     public:
-        PyObject *py_f, *py_j;
+        PyObject *py_rhs, *py_jac;
         size_t ny;
         std::vector<double> xout;
         std::vector<double> yout;
 
-        PyGslOdeiv2(PyObject * py_f, PyObject * py_j, size_t ny) :
-            py_f(py_f), py_j(py_j), ny(ny) {}
-        size_t integrate_adaptive(PyObject *py_y0, double x0, double xend,
-                                  double dx0, double atol, double rtol,
-                                  int step_type_idx){
-            System system = {func, jac, this->ny, static_cast<void*>(this)};
+        PyGslOdeiv2(PyObject * py_rhs, PyObject * py_jac, size_t ny) :
+            py_rhs(py_rhs), py_jac(py_jac), ny(ny) {}
+        size_t adaptive(PyObject *py_y0, double x0, double xend,
+                        double dx0, double atol, double rtol,
+                        int step_type_idx){
+            System sys(this->ny, static_cast<void*>(this));
+            Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
             Step step(step_type_idx, this->ny);
+            step.set_driver(drv);
             Control control(atol, rtol);
+            control.set_driver(drv);
             Evolve evolve(this->ny);
-            std::vector<double> tout;
-            std::vector<double> yout;
+            evolve.set_driver(drv);
             int info;
             size_t nsteps = 0;
             while (x0 < xend){
-                info = evolve.apply(control, step, system, &x0, xend, &dx0,
+                info = evolve.apply(control, step, sys, &x0, xend, &dx0,
                                     (double*)PyArray_GETPTR1(py_y0, 0));
                 if (info != GSL_SUCCESS)
                     throw std::runtime_error("evolve.apply failed");
@@ -142,50 +152,51 @@ namespace gslodeiv2{
             }
             return nsteps;
         }
-        int integrate_fixed_step (double t, double t1, double *y, size_t n_steps,
-                                  double hstart, double epsabs,
-                                  double epsrel,
-                                  int step_type_idx, double * tout, double * yout,
-                                  double hmin=0, double hmax=0)
+        void predefined(PyObject *py_y0, PyObject *py_xout, PyObject *py_yout,
+                        double dx0, double atol, double rtol,
+                        int step_type_idx, double dx_max=0.0, double dx_min=0.0)
         {
-            System sys = {func, jac, this->ny, static_cast<void*>(this)};
-            Driver d(step_type_idx, this->ny, sys, hstart, epsabs, epsrel);
-            double ti, dt = (t1-t)/n_steps;
-            int status;
-            if (hmax > 0) d.set_hmax(hmax);
-            if (hmin > 0) d.set_hmin(hmin);
-            for (unsigned int i=0; i<n_steps; ++i){
-                ti = t + dt;
-                status = d.apply(&t, ti, y);
-                if (status != GSL_SUCCESS)
-                    break;
-                tout[i] = t;
-                for (unsigned int j=0; i<(this->ny); ++j)
-                    yout[i*this->ny + j] = y[j];
+            System sys(this->ny, static_cast<void*>(this));
+            Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
+            int info;
+            if (dx_max > 0) drv.set_hmax(dx_max);
+            if (dx_min > 0) drv.set_hmin(dx_min);
+            double xval = *(double*)PyArray_GETPTR1(py_xout, 0);
+            npy_intp n_steps = PyArray_DIMS(py_xout)[0] - 1;
+            for (npy_intp ix=0; ix<n_steps; ++ix){
+                double * prev_ydata = (double *)PyArray_GETPTR2(py_yout, ix, 0);
+                std::copy(prev_ydata, prev_ydata+this->ny,
+                          (double*)PyArray_GETPTR2(py_yout, ix+1, 0));
+                info = drv.apply(&xval, *(double*)PyArray_GETPTR1(py_xout, ix+1),
+                                 (double*)PyArray_GETPTR2(py_yout, ix+1, 0));
+                if (info != GSL_SUCCESS)
+                    throw std::runtime_error("driver.apply failed");
             }
-            return status;
         }
     };
 
 } // namespace gslodeiv2
 
-int gslodeiv2::func(double xval, const double y[], double dydx[], void * params)
+int gslodeiv2::rhs(double xval, const double y[], double dydx[], void * params)
 {
     auto obj = static_cast<gslodeiv2::PyGslOdeiv2*>(params);
     npy_intp dims[1] { obj->ny } ;
-    PyObject * py_yarr = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, const_cast<double *>(y));
-    PyObject * py_dydx = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, const_cast<double *>(dydx));
+    PyObject * py_yarr = PyArray_SimpleNewFromData(
+        1, dims, NPY_DOUBLE, static_cast<void*>(const_cast<double*>(y)));
+    PyObject * py_dydx = PyArray_SimpleNewFromData(
+        1, dims, NPY_DOUBLE, static_cast<void*>(dydx));
     PyObject * py_arglist = Py_BuildValue("(dOO)", xval, py_yarr, py_dydx);
-    PyObject * py_result = PyEval_CallObject(obj->py_f, py_arglist);
+    PyObject * py_result = PyEval_CallObject(obj->py_rhs, py_arglist);
     Py_DECREF(py_arglist);
     Py_DECREF(py_dydx);
     Py_DECREF(py_yarr);
     if (py_result == nullptr){
-        PyErr_SetString(PyExc_RuntimeError, "f() failed");
-        return 1;
+        PyErr_SetString(PyExc_RuntimeError, "rhs() failed");
+        return GSL_EBADFUNC;
     } else if (py_result != Py_None){
         // py_result is not None
-        PyErr_SetString(PyExc_RuntimeError, "f() did not return None");
+        PyErr_SetString(PyExc_RuntimeError, "rhs() did not return None");
+        return GSL_EBADFUNC;
     }
     Py_DECREF(py_result);
     return GSL_SUCCESS;
@@ -200,17 +211,18 @@ int gslodeiv2::jac(double xval, const double y[], double *dfdy, double dfdx[], v
     PyObject * py_jmat = PyArray_SimpleNewFromData(2, Jdims, NPY_DOUBLE, const_cast<double *>(dfdy));
     PyObject * py_dfdx = PyArray_SimpleNewFromData(1, ydims, NPY_DOUBLE, const_cast<double *>(dfdx));
     PyObject * py_arglist = Py_BuildValue("(dOOO)", xval, py_yarr, py_jmat, py_dfdx);
-    PyObject * py_result = PyEval_CallObject(obj->py_j, py_arglist);
+    PyObject * py_result = PyEval_CallObject(obj->py_jac, py_arglist);
     Py_DECREF(py_arglist);
     Py_DECREF(py_dfdx);
     Py_DECREF(py_jmat);
     Py_DECREF(py_yarr);
     if (py_result == nullptr){
         PyErr_SetString(PyExc_RuntimeError, "f() failed");
-        return 1;
+        return GSL_EBADFUNC;
     } else if (py_result != Py_None){
         // py_result is not None
         PyErr_SetString(PyExc_RuntimeError, "f() did not return None");
+        return GSL_EBADFUNC;
     }
     Py_DECREF(py_result);
     return GSL_SUCCESS;
