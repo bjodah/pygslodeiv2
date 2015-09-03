@@ -41,7 +41,7 @@ The classic van der Pol oscillator (see `examples/van_der_pol.py <examples/van_d
 
 License
 =======
-The source code is Open Source and is released under GNU GPL v3. See `LICENSE.txt <LICENSE.txt>`_ for further details.
+The source code is Open Source and is released under GNU GPL v3. See `LICENSE <LICENSE>`_ for further details.
 Contributors are welcome to suggest improvements at https://github.com/bjodah/pygslodeiv2
 
 Author
