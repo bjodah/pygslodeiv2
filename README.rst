@@ -5,6 +5,12 @@ pygslodeiv2
 .. image:: http://hera.physchem.kth.se:8080/github.com/bjodah/pygslodeiv2/status.svg?branch=master
    :target: http://hera.physchem.kth.se:8080/github.com/bjodah/pygslodeiv2
    :alt: Build status
+.. image:: https://img.shields.io/pypi/v/pygslodeiv2.svg
+   :target: https://pypi.python.org/pypi/pygslodeiv2
+   :alt: PyPI version
+.. image:: https://img.shields.io/pypi/l/pygslodeiv2.svg
+   :target: https://github.com/bjodah/pygslodeiv2/blob/master/LICENSE
+   :alt: License
 
 ``pygslodeiv2`` provides a `Python <http://www.python.org>`_ binding to the
 `Ordinary Differential Equation <https://en.wikipedia.org/wiki/Ordinary_differential_equation>`_
@@ -36,7 +42,7 @@ The classic van der Pol oscillator (see `examples/van_der_pol.py <examples/van_d
    >>> tout, yout = integrate_adaptive(f, j, 2, y0, t0, tend, atol, rtol, dt0)
 
 
-.. image:: examples/van_der_pol.png
+.. image:: https://raw.githubusercontent.com/bjodah/pygslodeiv2/master/examples/van_der_pol.png
 
 
 License

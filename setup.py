@@ -70,6 +70,7 @@ setup_kwargs = dict(
     author='Björn Dahlgren',
     author_email='bjodah@DELETEMEgmail.com',
     url='https://github.com/bjodah/' + pkg_name,
+    license='GPLv3',
     packages=[pkg_name],
     ext_modules=ext_modules,
     include_dirs=[np.get_include(), './include']
