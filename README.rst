@@ -17,6 +17,20 @@ pygslodeiv2
 integration routines exposed by the `odeiv2 interface <https://www.gnu.org/software/gsl/manual/html_node/Ordinary-Differential-Equations.html>`_ of
 `GSL - GNU Scientific Library <http://www.gnu.org/software/gsl/>`_.
 The odeiv2 interface allows a user to numerically integrate (systems of) differential equations.
+The following `stepping functions <https://www.gnu.org/software/gsl/manual/html_node/Stepping-Functions.html>`_ are available:
+
+- rk2
+- rk4
+- rkf45
+- rkck
+- rk8pd
+- rk1imp
+- rk2imp
+- rk4imp
+- bsimp
+- msadams
+- msbdf
+
 
 Example
 =======
@@ -24,7 +38,8 @@ The classic van der Pol oscillator (see `examples/van_der_pol.py <examples/van_d
 
 .. code:: python
 
-   >>> from pygslodeiv2 import integrate_adaptive
+   >>> import numpy as np
+   >>> from pygslodeiv2 import integrate_predefined  # also: integrate_adaptive
    >>> mu = 1.0
    >>> def f(t, y, dydt):
    ...     dydt[0] = y[1]
@@ -38,8 +53,12 @@ The classic van der Pol oscillator (see `examples/van_der_pol.py <examples/van_d
    ...     dfdt[0] = 0
    ...     dfdt[1] = 0
    ...
-   >>> y0 = [1, 0]; tend=10.0; dt0=1e-8; t0=0.0; atol=1e-8; rtol=1e-8
-   >>> tout, yout = integrate_adaptive(f, j, 2, y0, t0, tend, atol, rtol, dt0)
+   >>> y0 = [1, 0]; dt0=1e-8; t0=0.0; atol=1e-8; rtol=1e-8
+   >>> tout = np.linspace(0, 10.0, 200)
+   >>> yout = integrate_predefined(f, j, y0, tout, atol, rtol, dt0,
+   ...                             method='bsimp')  # Implicit Bulirsch-Stoer
+   >>> import matplotlib.pyplot as plt
+   >>> plt.plot(tout, yout)
 
 
 .. image:: https://raw.githubusercontent.com/bjodah/pygslodeiv2/master/examples/van_der_pol.png
