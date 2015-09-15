@@ -42,7 +42,7 @@ if CONDA_BUILD:
     except IOError:
         pass
 
-release_py_path = os.path.join(pkg_name, 'release.py')
+release_py_path = os.path.join(pkg_name, '_release.py')
 
 if (len(PYGSLODEIV2_RELEASE_VERSION) > 1 and
    PYGSLODEIV2_RELEASE_VERSION[0] == 'v'):
@@ -50,7 +50,7 @@ if (len(PYGSLODEIV2_RELEASE_VERSION) > 1 and
     __version__ = PYGSLODEIV2_RELEASE_VERSION[1:]
 else:
     TAGGED_RELEASE = False
-    # read __version__ attribute from release.py:
+    # read __version__ attribute from _release.py:
     exec(open(release_py_path).read())
 
 classifiers = [
