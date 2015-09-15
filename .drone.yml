@@ -11,4 +11,7 @@ script:
   - ./scripts/generate_docs.sh
   - tar cjf doc.tar.bz2 doc/
   - scp doc.tar.bz2 dist/* pygslodeiv2@hera.physchem.kth.se:~/
+  - touch doc/_build/html/.nojekyll
+  - git config --global user.name "drone"
+  - git config --global user.email "drone@hera.physchem.kth.se"
   - ./scripts/github_upload.sh doc/_build/html bjodah pygslodeiv2 gh-pages

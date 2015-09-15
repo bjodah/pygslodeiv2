@@ -4,7 +4,7 @@ from __future__ import division, absolute_import
 
 from ._gslodeiv2_numpy import adaptive, predefined
 from ._util import _check_callable, _check_indexing
-from .release import __version__
+from ._release import __version__
 assert __version__  # silence pyflakes
 
 
