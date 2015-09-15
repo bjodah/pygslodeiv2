@@ -8,4 +8,7 @@ script:
   - PYTHONPATH=$(pwd) python2 -m pytest
   - PYTHONPATH=$(pwd) python3 -m pytest
   - python2 setup.py sdist
-  - scp dist/* pygslodeiv2@hera.physchem.kth.se:~/
+  - ./scripts/generate_docs.sh
+  - tar cjf doc.tar.bz2 doc/
+  - scp doc.tar.bz2 dist/* pygslodeiv2@hera.physchem.kth.se:~/
+  - ./scripts/github_upload.sh doc/_build/html bjodah pygslodeiv2 gh-pages

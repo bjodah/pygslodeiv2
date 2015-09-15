@@ -8,3 +8,4 @@ pygslodeiv2/_gslodeiv2_numpy.cpp
 MANIFEST
 .cache/
 pygslodeiv2/_gslodeiv2_numpy.c
+doc/
