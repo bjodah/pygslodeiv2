@@ -49,16 +49,19 @@ def _get_f_j(k):
         dfdx_out[2] = 0
     return f, j
 
-methods = [('bsimp', 3e-4), ('msadams', 5), ('rkf45', 0.5), ('rkck', 0.3),
-           ('rk8pd', 0.04), ('rk4imp', 0.8), ('msbdf', 23)]
+methods = [('bsimp', 3e-4, True), ('msadams', 5, False), ('rkf45', 0.5, False),
+           ('rkck', 0.3, False), ('rk8pd', 0.04, False), ('rk4imp', 0.8, True),
+           ('msbdf', 23, True)]
 # ['rk2', 'rk4', 'rk1imp', 'rk2imp']
 
 
-@pytest.mark.parametrize("method,forgiveness", methods)
-def test_integrate_adaptive(method, forgiveness):
+@pytest.mark.parametrize("method,forgiveness,use_jac", methods)
+def test_integrate_adaptive(method, forgiveness, use_jac):
     k = k0, k1, k2 = 2.0, 3.0, 4.0
     y0 = [0.7, 0.3, 0.5]
     f, j = _get_f_j(k)
+    if not use_jac:
+        j = None
     x0, xend, dx0 = 0, 3, 1e-10
     atol, rtol = 1e-8, 1e-8
     xout, yout = integrate_adaptive(f, j, y0, x0, xend, dx0, atol, rtol,
@@ -69,11 +72,13 @@ def test_integrate_adaptive(method, forgiveness):
                        atol=forgiveness*atol)
 
 
-@pytest.mark.parametrize("method,forgiveness", methods)
-def test_integrate_predefined(method, forgiveness):
+@pytest.mark.parametrize("method,forgiveness,use_jac", methods)
+def test_integrate_predefined(method, forgiveness, use_jac):
     k = k0, k1, k2 = 2.0, 3.0, 4.0
     y0 = [0.7, 0.3, 0.5]
     f, j = _get_f_j(k)
+    if not use_jac:
+        j = None
     xout = np.linspace(0, 3, 31)
     dx0 = 1e-10
     atol, rtol = 1e-8, 1e-8
