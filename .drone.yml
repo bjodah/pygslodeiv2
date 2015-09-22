@@ -14,4 +14,4 @@ script:
   - touch doc/_build/html/.nojekyll
   - git config --global user.name "drone"
   - git config --global user.email "drone@hera.physchem.kth.se"
-  - ./scripts/github_upload.sh doc/_build/html bjodah pygslodeiv2 gh-pages
+  - if [[ "$DRONE_BRANCH" == "master" ]]; then ./scripts/github_upload.sh doc/_build/html bjodah pygslodeiv2 gh-pages; fi
