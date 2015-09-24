@@ -180,7 +180,7 @@ namespace gslodeiv2{
 int gslodeiv2::rhs(double xval, const double y[], double dydx[], void * params)
 {
     auto obj = static_cast<gslodeiv2::PyGslOdeiv2*>(params);
-    npy_intp dims[1] { obj->ny } ;
+    npy_intp dims[1] { static_cast<npy_intp>(obj->ny) } ;
     PyObject * py_yarr = PyArray_SimpleNewFromData(
         1, dims, NPY_DOUBLE, static_cast<void*>(const_cast<double*>(y)));
     PyObject * py_dydx = PyArray_SimpleNewFromData(
@@ -205,8 +205,8 @@ int gslodeiv2::rhs(double xval, const double y[], double dydx[], void * params)
 int gslodeiv2::jac(double xval, const double y[], double *dfdy, double dfdx[], void *params)
 {
     auto obj = static_cast<gslodeiv2::PyGslOdeiv2*>(params);
-    npy_intp ydims[1] { obj->ny };
-    npy_intp Jdims[2] { obj->ny, obj->ny };
+    npy_intp ydims[1] { static_cast<npy_intp>(obj->ny) };
+    npy_intp Jdims[2] { static_cast<npy_intp>(obj->ny), static_cast<npy_intp>(obj->ny) };
     PyObject * py_yarr = PyArray_SimpleNewFromData(1, ydims, NPY_DOUBLE, const_cast<double *>(y));
     PyObject * py_jmat = PyArray_SimpleNewFromData(2, Jdims, NPY_DOUBLE, const_cast<double *>(dfdy));
     PyObject * py_dfdx = PyArray_SimpleNewFromData(1, ydims, NPY_DOUBLE, const_cast<double *>(dfdx));
