@@ -42,7 +42,7 @@ cdef class GslOdeiv2:
 
     def get_xout(self, size_t nsteps):
         cdef cnp.ndarray[cnp.float64_t, ndim=1] xout = np.empty(nsteps, dtype=np.float64)
-        cdef int i
+        cdef size_t i
         for i in range(nsteps):
             xout[i] = self.thisptr.xout[i]
         return xout
@@ -50,8 +50,8 @@ cdef class GslOdeiv2:
     def get_yout(self, size_t nsteps):
         cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((nsteps, self.thisptr.ny),
                                                                 dtype=np.float64)
-        cdef int i
-        cdef int ny = self.thisptr.ny
+        cdef size_t i
+        cdef size_t ny = self.thisptr.ny
         for i in range(nsteps):
             for j in range(ny):
                 yout[i, j] = self.thisptr.yout[i*ny + j]
