@@ -17,7 +17,7 @@ pkg_name = 'pygslodeiv2'
 ext_modules = []
 
 if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
-            '--help-commands', 'egg_info', 'clean', '--version'):
+        '--help-commands', 'egg_info', 'clean', '--version'):
     USE_CYTHON = os.path.exists('pygslodeiv2/_gslodeiv2_numpy.pyx')
     ext = '.pyx' if USE_CYTHON else '.cpp'
     ext_modules = [
