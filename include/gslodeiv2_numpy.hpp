@@ -152,7 +152,7 @@ namespace gslodeiv2{
             }
             return nsteps;
         }
-        void predefined(PyObject *py_y0, PyObject *py_xout, PyObject *py_yout,
+        void predefined(PyObject *py_xout, PyObject *py_yout,
                         double dx0, double atol, double rtol,
                         int step_type_idx, double dx_max=0.0, double dx_min=0.0)
         {
