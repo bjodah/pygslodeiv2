@@ -1,3 +1,9 @@
+v0.3.1
+======
+- Less strict callback checks on python side.
+- Minor C++ API clean up.
+
+
 v0.3.0
 ======
 - Jacobian callback only need for steppers using it.

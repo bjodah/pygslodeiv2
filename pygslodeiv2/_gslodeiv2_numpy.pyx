@@ -36,8 +36,8 @@ cdef class GslOdeiv2:
         if y0.size < self.thisptr.ny:
             raise ValueError("y0 too short")
         yout[0, :] = y0
-        self.thisptr.predefined(<PyObject*>y0, <PyObject*>xout, <PyObject*> yout,
-                                dx0, atol, rtol, step_type_idx, dx_max, dx_min)
+        self.thisptr.predefined(<PyObject*>xout, <PyObject*> yout, dx0, atol, rtol,
+                                step_type_idx, dx_max, dx_min)
         return yout
 
     def get_xout(self, size_t nsteps):
@@ -58,7 +58,7 @@ cdef class GslOdeiv2:
         return yout
 
 
-step_type_indices = ['rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
+steppers = ['rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
                      'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf']
 requires_jac = ('rk1imp', 'rk2imp', 'rk4imp', 'bsimp', 'msbdf')
 
@@ -69,7 +69,7 @@ def adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol, method='bsimp'):
     integr = GslOdeiv2(rhs, jac, len(y0))
     nsteps = integr.adaptive(np.array(y0, dtype=np.float64),
                              x0, xend, dx0, atol, rtol,
-                             step_type_indices.index(method))
+                             steppers.index(method))
     return integr.get_xout(nsteps), integr.get_yout(nsteps)
 
 
@@ -77,6 +77,6 @@ def predefined(rhs, jac, y0, xout, dx0, atol, rtol, method='bsimp'):
     if method in requires_jac and jac is None:
         raise ValueError("Method requires explicit jacobian callback")
     integr = GslOdeiv2(rhs, jac, len(y0))
-    return integr.predefined(np.array(y0, dtype=np.float64),
-                             np.array(xout, dtype=np.float64),
-                             dx0, atol, rtol, step_type_indices.index(method))
+    return integr.predefined(np.asarray(y0, dtype=np.float64),
+                             np.asarray(xout, dtype=np.float64),
+                             dx0, atol, rtol, steppers.index(method))
