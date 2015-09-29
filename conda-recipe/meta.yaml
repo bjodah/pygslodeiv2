@@ -17,10 +17,13 @@ requirements:
     run:
         - numpy
         - python
+        - gsl
 
 test:
     imports:
         - pygslodeiv2
+    requires:
+        - pytest
 
 about:
     home: https://github.com/bjodah/pygslodeiv2
