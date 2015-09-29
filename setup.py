@@ -61,6 +61,10 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Mathematics',
 ]
 
+tests = [
+    'pygslodeiv2.tests',
+]
+
 descr = 'Python binding for odeiv2 in GNU Scientific Library (GSL).'
 setup_kwargs = dict(
     name=pkg_name,
@@ -71,7 +75,7 @@ setup_kwargs = dict(
     author_email='bjodah@DELETEMEgmail.com',
     url='https://github.com/bjodah/' + pkg_name,
     license='GPLv3',
-    packages=[pkg_name],
+    packages=[pkg_name] + tests,
     ext_modules=ext_modules,
     include_dirs=[np.get_include(), './include']
 )

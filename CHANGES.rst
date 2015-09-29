@@ -1,3 +1,7 @@
+v0.3.2
+======
+- Ship tests with package (e.g.: python -m pytest --pyargs pygslodeiv2)
+
 v0.3.1
 ======
 - Less strict callback checks on python side.
