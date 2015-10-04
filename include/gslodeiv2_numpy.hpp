@@ -196,6 +196,7 @@ int gslodeiv2::rhs(double xval, const double y[], double dydx[], void * params)
     } else if (py_result != Py_None){
         // py_result is not None
         PyErr_SetString(PyExc_RuntimeError, "rhs() did not return None");
+        Py_DECREF(py_result);
         return GSL_EBADFUNC;
     }
     Py_DECREF(py_result);
@@ -222,22 +223,11 @@ int gslodeiv2::jac(double xval, const double y[], double *dfdy, double dfdx[], v
     } else if (py_result != Py_None){
         // py_result is not None
         PyErr_SetString(PyExc_RuntimeError, "f() did not return None");
+        Py_DECREF(py_result);
         return GSL_EBADFUNC;
     }
     Py_DECREF(py_result);
     return GSL_SUCCESS;
 }
 
-// class Block {
-//     gsl_block * m_block;
-// public:
-//     Block(size_t dim) : m_block(gsl_block_calloc(dim)) {}
-//     ~Block() { gsl_block_free(m_block); }
-// }
-// class Matrix {
-//     gsl_matrix * m_matrix;
-// public:
-//     Matrix(size_t dim1, size_t dim2) : m_matrix(gsl_matrix_calloc(dim1, dim2)) {}
-//     ~Matrix() { gsl_matrix_free(m_matrix); }
-// }
 #endif /* GSLODEIV2_H_RVEFMVJH25BGNEJDX4WHGA73YI */
