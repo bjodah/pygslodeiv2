@@ -1,3 +1,9 @@
+v0.3.3
+======
+- Fix minor memory leak
+- Made y read-only in Python callbacks
+- Do not overwrite Python error string when callback raises Exception.
+
 v0.3.2
 ======
 - Ship tests with package (e.g.: python -m pytest --pyargs pygslodeiv2)

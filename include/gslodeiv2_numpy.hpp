@@ -176,13 +176,15 @@ namespace gslodeiv2{
     };
 
 } // namespace gslodeiv2
-
 int gslodeiv2::rhs(double xval, const double y[], double dydx[], void * params)
 {
     auto obj = static_cast<gslodeiv2::PyGslOdeiv2*>(params);
     npy_intp dims[1] { static_cast<npy_intp>(obj->ny) } ;
-    PyObject * py_yarr = PyArray_SimpleNewFromData(
-        1, dims, NPY_DOUBLE, static_cast<void*>(const_cast<double*>(y)));
+    npy_intp y_strides[1] { sizeof(double) };
+    PyObject* py_yarr = PyArray_New(
+                &PyArray_Type, 1, dims, NPY_DOUBLE, y_strides,
+                static_cast<void *>(const_cast<double *>(y)), sizeof(double),
+                NPY_ARRAY_C_CONTIGUOUS, nullptr);
     PyObject * py_dydx = PyArray_SimpleNewFromData(
         1, dims, NPY_DOUBLE, static_cast<void*>(dydx));
     PyObject * py_arglist = Py_BuildValue("(dOO)", xval, py_yarr, py_dydx);
@@ -191,11 +193,11 @@ int gslodeiv2::rhs(double xval, const double y[], double dydx[], void * params)
     Py_DECREF(py_dydx);
     Py_DECREF(py_yarr);
     if (py_result == nullptr){
-        PyErr_SetString(PyExc_RuntimeError, "rhs() failed");
         return GSL_EBADFUNC;
     } else if (py_result != Py_None){
         // py_result is not None
         PyErr_SetString(PyExc_RuntimeError, "rhs() did not return None");
+        Py_DECREF(py_result);
         return GSL_EBADFUNC;
     }
     Py_DECREF(py_result);
@@ -206,8 +208,12 @@ int gslodeiv2::jac(double xval, const double y[], double *dfdy, double dfdx[], v
 {
     auto obj = static_cast<gslodeiv2::PyGslOdeiv2*>(params);
     npy_intp ydims[1] { static_cast<npy_intp>(obj->ny) };
+    npy_intp y_strides[1] { sizeof(double) };
     npy_intp Jdims[2] { static_cast<npy_intp>(obj->ny), static_cast<npy_intp>(obj->ny) };
-    PyObject * py_yarr = PyArray_SimpleNewFromData(1, ydims, NPY_DOUBLE, const_cast<double *>(y));
+    PyObject* py_yarr = PyArray_New(
+                &PyArray_Type, 1, ydims, NPY_DOUBLE, y_strides,
+                static_cast<void *>(const_cast<double *>(y)), sizeof(double),
+                NPY_ARRAY_C_CONTIGUOUS, nullptr);
     PyObject * py_jmat = PyArray_SimpleNewFromData(2, Jdims, NPY_DOUBLE, const_cast<double *>(dfdy));
     PyObject * py_dfdx = PyArray_SimpleNewFromData(1, ydims, NPY_DOUBLE, const_cast<double *>(dfdx));
     PyObject * py_arglist = Py_BuildValue("(dOOO)", xval, py_yarr, py_jmat, py_dfdx);
@@ -217,27 +223,15 @@ int gslodeiv2::jac(double xval, const double y[], double *dfdy, double dfdx[], v
     Py_DECREF(py_jmat);
     Py_DECREF(py_yarr);
     if (py_result == nullptr){
-        PyErr_SetString(PyExc_RuntimeError, "f() failed");
         return GSL_EBADFUNC;
     } else if (py_result != Py_None){
         // py_result is not None
-        PyErr_SetString(PyExc_RuntimeError, "f() did not return None");
+        PyErr_SetString(PyExc_RuntimeError, "jac() did not return None");
+        Py_DECREF(py_result);
         return GSL_EBADFUNC;
     }
     Py_DECREF(py_result);
     return GSL_SUCCESS;
 }
 
-// class Block {
-//     gsl_block * m_block;
-// public:
-//     Block(size_t dim) : m_block(gsl_block_calloc(dim)) {}
-//     ~Block() { gsl_block_free(m_block); }
-// }
-// class Matrix {
-//     gsl_matrix * m_matrix;
-// public:
-//     Matrix(size_t dim1, size_t dim2) : m_matrix(gsl_matrix_calloc(dim1, dim2)) {}
-//     ~Matrix() { gsl_matrix_free(m_matrix); }
-// }
 #endif /* GSLODEIV2_H_RVEFMVJH25BGNEJDX4WHGA73YI */

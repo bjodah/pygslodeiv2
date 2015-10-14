@@ -6,6 +6,11 @@ from pygslodeiv2 import (
     integrate_adaptive, integrate_predefined, requires_jac
 )
 
+decay_defaults = dict(y0=[0.7, 0.3, 0.5],
+                      xout=np.linspace(0, 3, 31),
+                      dx0=1e-10, atol=1e-8, rtol=1e-8)
+decay_default_k = [2.0, 3.0, 4.0]
+
 decay_analytic = {
     0: lambda y0, k, t: (
         y0[0] * np.exp(-k[0]*t)),
@@ -89,11 +94,57 @@ def test_integrate_predefined(method, forgiveness):
     dx0 = 1e-10
     atol, rtol = 1e-8, 1e-8
     # Run twice to catch possible side-effects:
-    yout = integrate_predefined(f, j, y0, xout, dx0, 1e-8, 1e-8, method=method)
-    yout = integrate_predefined(f, j, y0, xout, dx0, 1e-8, 1e-8, method=method)
+    yout = integrate_predefined(f, j, y0, xout, dx0, atol, rtol, method=method)
+    yout = integrate_predefined(f, j, y0, xout, dx0, atol, rtol, method=method)
     yref = decay_get_Cref(k, y0, xout)
     print(yout)
     print(yref)
     assert np.allclose(yout, yref,
                        rtol=forgiveness*rtol,
                        atol=forgiveness*atol)
+
+
+def test_bad_f():
+    k0, k1, k2 = decay_default_k
+
+    def f(t, y, fout):
+        y[0] = -1  # read-only! should raise ValueError
+        fout[0] = -k0*y[0]
+        fout[1] = k0*y[0] - k1*y[1]
+        fout[2] = k1*y[1] - k2*y[2]
+    with pytest.raises(ValueError):
+        yout = integrate_predefined(f, None, method='rkck',
+                                    check_callable=False,
+                                    check_indexing=False,
+                                    **decay_defaults)
+        assert yout  # silence pyflakes
+
+
+def test_bad_j():
+    k0, k1, k2 = decay_default_k
+
+    def f(t, y, fout):
+        fout[0] = -k0*y[0]
+        fout[1] = k0*y[0] - k1*y[1]
+        fout[2] = k1*y[1] - k2*y[2]
+
+    def j(t, y, jmat_out, dfdx_out):
+        y[0] = -1  # read-only! should raise ValueError
+        jmat_out[0, 0] = -k0
+        jmat_out[0, 1] = 0
+        jmat_out[0, 2] = 0
+        jmat_out[1, 0] = k0
+        jmat_out[1, 1] = -k1
+        jmat_out[1, 2] = 0
+        jmat_out[2, 0] = 0
+        jmat_out[2, 1] = k1
+        jmat_out[2, 2] = -k2
+        dfdx_out[0] = 0
+        dfdx_out[1] = 0
+        dfdx_out[2] = 0
+    with pytest.raises(ValueError):
+        yout = integrate_predefined(f, j, method='bsimp',
+                                    check_callable=False,
+                                    check_indexing=False,
+                                    **decay_defaults)
+        assert yout  # silence pyflakes
