@@ -117,6 +117,26 @@ namespace gslodeiv2{
         }
         int reset() { return gsl_odeiv2_evolve_reset(m_evolve); }
     };
+    void py_handle_error(const char * reason,
+                         const char * file,
+                         int line,
+                         int gsl_errno) {
+        PyErr_SetString(PyExc_RuntimeError, reason);
+    }
+
+    struct PyErrorHandler {
+        gsl_error_handler_t *m_ori_handler;
+        PyErrorHandler() {
+            m_ori_handler = gsl_set_error_handler(&py_handle_error);
+        }
+        ~PyErrorHandler() {
+            if (m_ori_handler)
+                this->release();
+        }
+        void release() {
+            gsl_set_error_handler(m_ori_handler);
+        }
+    };
 
     class PyGslOdeiv2 {
     public:
@@ -130,6 +150,7 @@ namespace gslodeiv2{
         size_t adaptive(PyObject *py_y0, double x0, double xend,
                         double dx0, double atol, double rtol,
                         int step_type_idx){
+            auto handler = PyErrorHandler();
             System sys(this->ny, static_cast<void*>(this));
             Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
             Step step(step_type_idx, this->ny);
@@ -156,6 +177,7 @@ namespace gslodeiv2{
                         double dx0, double atol, double rtol,
                         int step_type_idx, double dx_max=0.0, double dx_min=0.0)
         {
+            auto handler = PyErrorHandler();
             System sys(this->ny, static_cast<void*>(this));
             Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
             int info;
