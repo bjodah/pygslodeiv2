@@ -80,7 +80,7 @@ The classic van der Pol oscillator (see `examples/van_der_pol.py <examples/van_d
    ...
    >>> y0 = [1, 0]; dt0=1e-8; t0=0.0; atol=1e-8; rtol=1e-8
    >>> tout = np.linspace(0, 10.0, 200)
-   >>> yout = integrate_predefined(f, j, y0, tout, atol, rtol, dt0,
+   >>> yout = integrate_predefined(f, j, y0, tout, dt0, atol, rtol,
    ...                             method='bsimp')  # Implicit Bulirsch-Stoer
    >>> import matplotlib.pyplot as plt
    >>> plt.plot(tout, yout)  # doctest: +SKIP
