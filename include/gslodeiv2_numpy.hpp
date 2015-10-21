@@ -142,6 +142,8 @@ namespace gslodeiv2{
     public:
         PyObject *py_rhs, *py_jac;
         size_t ny;
+        size_t nrhs;
+        size_t njac;
         std::vector<double> xout;
         std::vector<double> yout;
 
@@ -161,6 +163,7 @@ namespace gslodeiv2{
             evolve.set_driver(drv);
             int info;
             size_t nsteps = 0;
+            nrhs = 0; njac = 0;
             while (x0 < xend){
                 info = evolve.apply(control, step, sys, &x0, xend, &dx0,
                                     (double*)PyArray_GETPTR1(py_y0, 0));
@@ -185,6 +188,7 @@ namespace gslodeiv2{
             if (dx_min > 0) drv.set_hmin(dx_min);
             double xval = *(double*)PyArray_GETPTR1(py_xout, 0);
             npy_intp n_steps = PyArray_DIMS(py_xout)[0] - 1;
+            nrhs = 0; njac = 0;
             for (npy_intp ix=0; ix<n_steps; ++ix){
                 double * prev_ydata = (double *)PyArray_GETPTR2(py_yout, ix, 0);
                 std::copy(prev_ydata, prev_ydata+this->ny,
@@ -214,6 +218,7 @@ int gslodeiv2::rhs(double xval, const double y[], double dydx[], void * params)
     Py_DECREF(py_arglist);
     Py_DECREF(py_dydx);
     Py_DECREF(py_yarr);
+    obj->nrhs++;
     if (py_result == nullptr){
         return GSL_EBADFUNC;
     } else if (py_result != Py_None){
@@ -244,6 +249,7 @@ int gslodeiv2::jac(double xval, const double y[], double *dfdy, double dfdx[], v
     Py_DECREF(py_dfdx);
     Py_DECREF(py_jmat);
     Py_DECREF(py_yarr);
+    obj->njac++;
     if (py_result == nullptr){
         return GSL_EBADFUNC;
     } else if (py_result != Py_None){
