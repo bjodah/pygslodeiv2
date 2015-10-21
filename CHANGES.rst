@@ -1,6 +1,10 @@
-v0.3.4
+v0.4.0
 ======
-- expose ``gslodeiv2.steppers`` tuple.
+- New function signature: integrate_predefined and integrate_adaptive now
+  also return an info dict containing ``nrhs`` and ``njac`` conatining
+  number of calls to each function made during last integration.
+- Expose ``gslodeiv2.steppers`` tuple.
+- check_callbable and check_indexing kwargs now defaults to False
 
 v0.3.3
 ======

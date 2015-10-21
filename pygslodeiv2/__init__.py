@@ -9,7 +9,7 @@ assert (__version__, requires_jac, steppers)  # silence pyflakes
 
 
 def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
-                       check_callable=True, check_indexing=True, **kwargs):
+                       check_callable=False, check_indexing=False, **kwargs):
     """
     Integrates a system of ordinary differential equations.
 
@@ -59,7 +59,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
 
 
 def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
-                         check_callable=True, check_indexing=True, **kwargs):
+                         check_callable=False, check_indexing=False, **kwargs):
     """
     Integrates a system of ordinary differential equations.
 

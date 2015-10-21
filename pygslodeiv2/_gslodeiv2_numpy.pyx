@@ -58,6 +58,10 @@ cdef class GslOdeiv2:
                 yout[i, j] = self.thisptr.yout[i*ny + j]
         return yout
 
+    def get_info(self):
+        return {'nrhs': self.thisptr.nrhs, 'njac': self.thisptr.njac}
+
+
 steppers = (
     'rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
     'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf'
@@ -75,13 +79,14 @@ def adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol, method='bsimp'):
     nsteps = integr.adaptive(np.array(y0, dtype=np.float64),
                              x0, xend, dx0, atol, rtol,
                              steppers.index(method))
-    return integr.get_xout(nsteps), integr.get_yout(nsteps)
+    return integr.get_xout(nsteps), integr.get_yout(nsteps), integr.get_info()
 
 
 def predefined(rhs, jac, y0, xout, dx0, atol, rtol, method='bsimp'):
     if method in requires_jac and jac is None:
         raise ValueError("Method requires explicit jacobian callback")
     integr = GslOdeiv2(rhs, jac, len(y0))
-    return integr.predefined(np.asarray(y0, dtype=np.float64),
+    yout = integr.predefined(np.asarray(y0, dtype=np.float64),
                              np.asarray(xout, dtype=np.float64),
                              dx0, atol, rtol, steppers.index(method))
+    return yout, integr.get_info()
