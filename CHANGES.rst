@@ -1,3 +1,7 @@
+v0.3.4
+======
+- expose ``gslodeiv2.steppers`` tuple.
+
 v0.3.3
 ======
 - Fix minor memory leak

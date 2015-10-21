@@ -31,25 +31,26 @@ cdef class GslOdeiv2:
                    cnp.ndarray[cnp.float64_t, ndim=1] xout,
                    double dx0, double atol, double rtol,
                    int step_type_idx=8, double dx_max=0, double dx_min=0):
-        cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((xout.size, y0.size),
-                                                                dtype=np.float64)
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty(
+            (xout.size, y0.size), dtype=np.float64)
         if y0.size < self.thisptr.ny:
             raise ValueError("y0 too short")
         yout[0, :] = y0
-        self.thisptr.predefined(<PyObject*>xout, <PyObject*> yout, dx0, atol, rtol,
-                                step_type_idx, dx_max, dx_min)
+        self.thisptr.predefined(<PyObject*>xout, <PyObject*> yout, dx0, atol,
+                                rtol, step_type_idx, dx_max, dx_min)
         return yout
 
     def get_xout(self, size_t nsteps):
-        cdef cnp.ndarray[cnp.float64_t, ndim=1] xout = np.empty(nsteps, dtype=np.float64)
+        cdef cnp.ndarray[cnp.float64_t, ndim=1] xout = np.empty(
+            nsteps, dtype=np.float64)
         cdef size_t i
         for i in range(nsteps):
             xout[i] = self.thisptr.xout[i]
         return xout
 
     def get_yout(self, size_t nsteps):
-        cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((nsteps, self.thisptr.ny),
-                                                                dtype=np.float64)
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((
+            nsteps, self.thisptr.ny), dtype=np.float64)
         cdef size_t i
         cdef size_t ny = self.thisptr.ny
         for i in range(nsteps):
@@ -57,10 +58,14 @@ cdef class GslOdeiv2:
                 yout[i, j] = self.thisptr.yout[i*ny + j]
         return yout
 
+steppers = (
+    'rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
+    'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf'
+)
+requires_jac = (
+    'rk1imp', 'rk2imp', 'rk4imp', 'bsimp', 'msbdf'
+)
 
-steppers = ['rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
-                     'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf']
-requires_jac = ('rk1imp', 'rk2imp', 'rk4imp', 'bsimp', 'msbdf')
 
 def adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol, method='bsimp'):
     cdef size_t nsteps
