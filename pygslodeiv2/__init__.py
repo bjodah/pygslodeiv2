@@ -32,9 +32,9 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         absolute tolerance
     rtol: float
         relative tolerance
-    check_callable: bool (default: True)
+    check_callable: bool (default: False)
         perform signature sanity checks on ``rhs`` and ``jac``
-    check_indexing: bool (default: True)
+    check_indexing: bool (default: False)
         perform item setting sanity checks on ``rhs`` and ``jac``.
     \*\*kwargs:
          'method': str
@@ -43,10 +43,11 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
 
     Returns
     -------
-    (xout, yout):
+    (xout, yout, info):
         xout: 1-dimensional array of values for the independent variable
         yout: 2-dimensional array of the dependent variables (axis 1) for
             values corresponding to xout (axis 0)
+        info: dictionary with information about the integration
     """
     # Sanity checks to reduce risk of having a segfault:
     if check_callable:
@@ -80,9 +81,9 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
         absolute tolerance
     rtol: float
         relative tolerance
-    check_callable: bool (default: True)
+    check_callable: bool (default: False)
         perform signature sanity checks on ``rhs`` and ``jac``
-    check_indexing: bool (default: True)
+    check_indexing: bool (default: False)
         perform item setting sanity checks on ``rhs`` and ``jac``.
     \*\*kwargs:
          'method': str
@@ -91,8 +92,10 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
 
     Returns
     -------
-    2-dimensional array of the dependent variables (axis 1) for
-    values corresponding to xout (axis 0)
+    (result, info):
+        result: 2-dimensional array of the dependent variables (axis 1) for
+            values corresponding to xout (axis 0)
+        info: dictionary with information about the integration
     """
     # Sanity checks to reduce risk of having a segfault:
     if check_callable:
