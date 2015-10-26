@@ -150,8 +150,8 @@ namespace gslodeiv2{
         PyGslOdeiv2(PyObject * py_rhs, PyObject * py_jac, size_t ny) :
             py_rhs(py_rhs), py_jac(py_jac), ny(ny) {}
         size_t adaptive(PyObject *py_y0, double x0, double xend,
-                        double dx0, double atol, double rtol,
-                        int step_type_idx){
+                        double atol, double rtol, int step_type_idx,
+                        double dx0, double dx_min=.0, double dx_max=.0){
             auto handler = PyErrorHandler();
             System sys(this->ny, static_cast<void*>(this));
             Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
@@ -163,6 +163,8 @@ namespace gslodeiv2{
             evolve.set_driver(drv);
             int info;
             size_t nsteps = 0;
+            if (dx_min > 0) drv.set_hmin(dx_min);
+            if (dx_max > 0) drv.set_hmax(dx_max);
             nrhs = 0; njac = 0;
             while (x0 < xend){
                 info = evolve.apply(control, step, sys, &x0, xend, &dx0,
@@ -177,17 +179,17 @@ namespace gslodeiv2{
             return nsteps;
         }
         void predefined(PyObject *py_xout, PyObject *py_yout,
-                        double dx0, double atol, double rtol,
-                        int step_type_idx, double dx_max=0.0, double dx_min=0.0)
+                        double atol, double rtol, int step_type_idx,
+                        double dx0, double dx_min=0.0, double dx_max=0.0)
         {
             auto handler = PyErrorHandler();
             System sys(this->ny, static_cast<void*>(this));
             Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
             int info;
-            if (dx_max > 0) drv.set_hmax(dx_max);
-            if (dx_min > 0) drv.set_hmin(dx_min);
             double xval = *(double*)PyArray_GETPTR1(py_xout, 0);
             npy_intp n_steps = PyArray_DIMS(py_xout)[0] - 1;
+            if (dx_min > 0) drv.set_hmin(dx_min);
+            if (dx_max > 0) drv.set_hmax(dx_max);
             nrhs = 0; njac = 0;
             for (npy_intp ix=0; ix<n_steps; ++ix){
                 double * prev_ydata = (double *)PyArray_GETPTR2(py_yout, ix, 0);
