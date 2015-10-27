@@ -11,6 +11,10 @@ pygslodeiv2
 .. image:: https://img.shields.io/pypi/l/pygslodeiv2.svg
    :target: https://github.com/bjodah/pygslodeiv2/blob/master/LICENSE
    :alt: License
+.. image:: http://hera.physchem.kth.se/~pygslodeiv2/master/htmlcov/coverage.svg
+   :target: http://hera.physchem.kth.se/~pygslodeiv2/master/htmlcov
+   :alt: coverage
+
 
 `pygslodeiv2 <https://github.com/bjodah/pygslodeiv2>`_ provides a
 `Python <http://www.python.org>`_ binding to the

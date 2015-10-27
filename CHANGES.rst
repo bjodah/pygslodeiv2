@@ -1,3 +1,9 @@
+v0.4.1
+======
+- Added support for (first) derivative in output
+- Min and max step now allowed to be set
+- Check against using dx0=0.0
+
 v0.4.0
 ======
 - New function signature: integrate_predefined and integrate_adaptive now
