@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+from math import exp
 import numpy as np
 import pytest
 
@@ -156,3 +158,17 @@ def test_bad_j():
                                           check_indexing=False,
                                           **decay_defaults)
         assert yout  # silence pyflakes
+
+
+def test_derivatives():
+    def f(t, y, fout):
+        fout[0] = y[0]
+    kwargs = dict(dx0=1e-10, atol=1e-8, rtol=1e-8, nderiv=1, method='msadams')
+    yout, info = integrate_predefined(f, None, [1], [0, 1, 2], **kwargs)
+    assert yout.shape == (3, 2, 1)
+    ref = np.array([
+        [[exp(0)], [exp(0)]],
+        [[exp(1)], [exp(1)]],
+        [[exp(2)], [exp(2)]],
+    ])
+    assert np.allclose(yout, ref)

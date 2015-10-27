@@ -10,6 +10,5 @@ cdef extern from "gslodeiv2_numpy.hpp" namespace "gslodeiv2":
         vector[double] yout
 
         PyGslOdeiv2(PyObject*, PyObject*, size_t)
-        size_t adaptive(PyObject*, double, double, double, double, double, int) except +
-        void predefined(PyObject*, PyObject*, double, double, double, int,
-                        double, double) except +
+        size_t adaptive(PyObject*, double, double, double, double, int, double, double, double) except +
+        void predefined(PyObject*, PyObject*, double, double, int, double, double, double) except +
