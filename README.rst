@@ -57,7 +57,7 @@ tests should pass.
 Binary distribution is available here:
 `<https://anaconda.org/bjodah/pygslodeiv2>`_
 
-Source distribution is available here (requires GSL v1.16 shared lib with headers):
+Source distribution is available here (requires GSL v1.16 or v2.1 shared lib with headers):
 `<https://pypi.python.org/pypi/pygslodeiv2>`_
 
 Examples

@@ -1,6 +1,6 @@
 package:
     name: pygslodeiv2
-    version: 0.3.0.git
+    version: 0.6.0.git
 
 source:
     path: ../
