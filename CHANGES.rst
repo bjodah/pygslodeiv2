@@ -1,3 +1,7 @@
+v0.5.0
+======
+- Changes to info dict: rename 'nrhs' -> 'nfev', 'njac' -> 'njev', added 'cpu_time', 'success'
+
 v0.4.1
 ======
 - Added support for (first) derivative in output

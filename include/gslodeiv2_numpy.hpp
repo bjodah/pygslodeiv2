@@ -3,6 +3,7 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
+#include <chrono> // std::clock
 #include <utility> // std::pair
 #include <vector> // std::vector
 
@@ -142,8 +143,8 @@ namespace gslodeiv2{
     public:
         PyObject *py_rhs, *py_jac;
         size_t ny;
-        size_t nrhs;
-        size_t njac;
+        size_t nrhs, njac;
+        double time_cpu;
         std::vector<double> xout;
         std::vector<double> yout;
 
@@ -152,6 +153,7 @@ namespace gslodeiv2{
         size_t adaptive(PyObject *py_y0, double x0, double xend,
                         double atol, double rtol, int step_type_idx,
                         double dx0, double dx_min=.0, double dx_max=.0){
+            std::clock_t cputime0 = std::clock();
             auto handler = PyErrorHandler();
             System sys(this->ny, static_cast<void*>(this));
             Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
@@ -176,12 +178,14 @@ namespace gslodeiv2{
                     this->yout.push_back(*(double*)PyArray_GETPTR1(py_y0, i));
                 nsteps++;
             }
+            this->time_cpu = (std::clock() - cputime0) / (double)CLOCKS_PER_SEC;
             return nsteps;
         }
         void predefined(PyObject *py_xout, PyObject *py_yout,
                         double atol, double rtol, int step_type_idx,
                         double dx0, double dx_min=0.0, double dx_max=0.0)
         {
+            std::clock_t cputime0 = std::clock();
             auto handler = PyErrorHandler();
             System sys(this->ny, static_cast<void*>(this));
             Driver drv(step_type_idx, this->ny, sys, dx0, atol, rtol);
@@ -200,6 +204,7 @@ namespace gslodeiv2{
                 if (info != GSL_SUCCESS)
                     throw std::runtime_error("driver.apply failed");
             }
+            this->time_cpu = (std::clock() - cputime0) / (double)CLOCKS_PER_SEC;
         }
     };
 

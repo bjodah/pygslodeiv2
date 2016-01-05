@@ -12,6 +12,7 @@ cdef class GslOdeiv2:
 
     cdef PyGslOdeiv2 *thisptr
     cdef object rhs
+    cdef bint success
 
     def __cinit__(self, object f, object j, size_t ny):
         self.rhs = f
@@ -28,8 +29,13 @@ cdef class GslOdeiv2:
             raise ValueError("y0 too short")
         if dx0 <= 0.0:
             raise ValueError("dx must be > 0")
-        return self.thisptr.adaptive(<PyObject*>y0, t0, tend, atol,
-                                     rtol, step_type_idx, dx0, dx_min, dx_max)
+        self.success = False
+        try:
+            return self.thisptr.adaptive(<PyObject*>y0, t0, tend, atol,
+                                         rtol, step_type_idx, dx0, dx_min, dx_max)
+        except:
+            self.success = False
+            raise
 
     def predefined(self, cnp.ndarray[cnp.float64_t, ndim=1] y0,
                    cnp.ndarray[cnp.float64_t, ndim=1] xout,
@@ -42,8 +48,13 @@ cdef class GslOdeiv2:
         if dx0 <= 0.0:
             raise ValueError("dx must be > 0")
         yout[0, :] = y0
-        self.thisptr.predefined(<PyObject*>xout, <PyObject*> yout, atol,
-                                rtol, step_type_idx, dx0, dx_max, dx_min)
+        self.success = True
+        try:
+            self.thisptr.predefined(<PyObject*>xout, <PyObject*> yout, atol,
+                                    rtol, step_type_idx, dx0, dx_max, dx_min)
+        except:
+            self.success = False
+            raise
         return yout
 
     def get_xout(self, size_t nsteps):
@@ -85,7 +96,12 @@ cdef class GslOdeiv2:
             raise NotImplementedError("Higher derivatives not available")
 
     def get_info(self):
-        return {'nrhs': self.thisptr.nrhs, 'njac': self.thisptr.njac}
+        return {
+            'success': self.success,
+            'nfev': self.thisptr.nrhs,
+            'njev': self.thisptr.njac,
+            'time_cpu': self.thisptr.time_cpu
+        }
 
 
 steppers = (

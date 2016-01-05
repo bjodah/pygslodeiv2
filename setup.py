@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Tested with GSL 1.16
+# Tested with GSL v1.16 and v2.1
 
 import os
 import shutil

@@ -6,6 +6,7 @@ from libcpp.vector cimport vector
 cdef extern from "gslodeiv2_numpy.hpp" namespace "gslodeiv2":
     cdef cppclass PyGslOdeiv2:
         size_t ny, nrhs, njac
+        double time_cpu
         vector[double] xout
         vector[double] yout
 
