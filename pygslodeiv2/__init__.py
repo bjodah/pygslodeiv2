@@ -8,7 +8,7 @@ from ._release import __version__
 
 
 def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
-                       dx_min=.0, dx_max=.0, nderiv=0,
+                       dx_min=.0, dx_max=.0, nsteps=500, nderiv=0,
                        check_callable=False, check_indexing=False, **kwargs):
     """
     Integrates a system of ordinary differential equations.
@@ -36,6 +36,8 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         minimum step (default: 0.0)
     dx_max: float
         maximum step (default: 0.0)
+    nsteps: int
+        maximum number of steps (default: 500)
     nderiv: int
         number of derivatives (0 or 1) (default: 0)
     check_callable: bool (default: False)
@@ -63,11 +65,11 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         _check_indexing(rhs, jac, x0, y0)
 
     return adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
-                    dx_min, dx_max, nderiv, **kwargs)
+                    dx_min, dx_max, nsteps, nderiv, **kwargs)
 
 
 def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
-                         dx_min=.0, dx_max=.0, nderiv=0,
+                         dx_min=.0, dx_max=.0, nsteps=500, nderiv=0,
                          check_callable=False, check_indexing=False, **kwargs):
     """
     Integrates a system of ordinary differential equations.
@@ -93,6 +95,8 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
         minimum step (default: 0.0)
     dx_max: float
         maximum step (default: 0.0)
+    nsteps: int
+        maximum number of steps (default: 500)
     nderiv: int
         number of derivatives (0 or 1) (default: 0)
     check_callable: bool (default: False)
@@ -119,4 +123,4 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
         _check_indexing(rhs, jac, xout[0], y0)
 
     return predefined(rhs, jac, y0, xout, dx0, atol, rtol,
-                      dx_min, dx_max, nderiv, **kwargs)
+                      dx_min, dx_max, nsteps, nderiv, **kwargs)

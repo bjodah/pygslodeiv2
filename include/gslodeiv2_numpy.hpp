@@ -152,7 +152,7 @@ namespace gslodeiv2{
             py_rhs(py_rhs), py_jac(py_jac), ny(ny) {}
         size_t adaptive(PyObject *py_y0, double x0, double xend,
                         double atol, double rtol, int step_type_idx,
-                        double dx0, double dx_min=.0, double dx_max=.0){
+                        double dx0, double dx_min=.0, double dx_max=.0, int nsteps=0){
             std::clock_t cputime0 = std::clock();
             auto handler = PyErrorHandler();
             System sys(this->ny, static_cast<void*>(this));
@@ -164,9 +164,10 @@ namespace gslodeiv2{
             Evolve evolve(this->ny);
             evolve.set_driver(drv);
             int info;
-            size_t nsteps = 0;
+            size_t steps_taken = 0;
             if (dx_min > 0) drv.set_hmin(dx_min);
             if (dx_max > 0) drv.set_hmax(dx_max);
+            drv.set_nmax(nsteps);
             nrhs = 0; njac = 0;
             while (x0 < xend){
                 info = evolve.apply(control, step, sys, &x0, xend, &dx0,
@@ -176,14 +177,14 @@ namespace gslodeiv2{
                 this->xout.push_back(x0);
                 for (size_t i=0; i<this->ny; ++i)
                     this->yout.push_back(*(double*)PyArray_GETPTR1(py_y0, i));
-                nsteps++;
+                steps_taken++;
             }
             this->time_cpu = (std::clock() - cputime0) / (double)CLOCKS_PER_SEC;
-            return nsteps;
+            return steps_taken;
         }
         void predefined(PyObject *py_xout, PyObject *py_yout,
                         double atol, double rtol, int step_type_idx,
-                        double dx0, double dx_min=0.0, double dx_max=0.0)
+                        double dx0, double dx_min=0.0, double dx_max=0.0, int nsteps=0)
         {
             std::clock_t cputime0 = std::clock();
             auto handler = PyErrorHandler();
@@ -194,6 +195,7 @@ namespace gslodeiv2{
             npy_intp n_steps = PyArray_DIMS(py_xout)[0] - 1;
             if (dx_min > 0) drv.set_hmin(dx_min);
             if (dx_max > 0) drv.set_hmax(dx_max);
+            drv.set_nmax(nsteps);
             nrhs = 0; njac = 0;
             for (npy_intp ix=0; ix<n_steps; ++ix){
                 double * prev_ydata = (double *)PyArray_GETPTR2(py_yout, ix, 0);
