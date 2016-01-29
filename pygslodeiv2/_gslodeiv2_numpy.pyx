@@ -24,7 +24,7 @@ cdef class GslOdeiv2:
     def adaptive(self, cnp.ndarray[cnp.float64_t, ndim=1] y0,
                  double t0, double tend, double atol, double rtol,
                  int step_type_idx=8, double dx0=.0, double dx_min=.0,
-                 double dx_max=.0):
+                 double dx_max=.0, int nsteps=0):
         if y0.size < self.thisptr.ny:
             raise ValueError("y0 too short")
         if dx0 <= 0.0:
@@ -32,7 +32,7 @@ cdef class GslOdeiv2:
         self.success = False
         try:
             return self.thisptr.adaptive(<PyObject*>y0, t0, tend, atol,
-                                         rtol, step_type_idx, dx0, dx_min, dx_max)
+                                         rtol, step_type_idx, dx0, dx_min, dx_max, nsteps)
         except:
             self.success = False
             raise
@@ -40,7 +40,7 @@ cdef class GslOdeiv2:
     def predefined(self, cnp.ndarray[cnp.float64_t, ndim=1] y0,
                    cnp.ndarray[cnp.float64_t, ndim=1] xout,
                    double atol, double rtol, int step_type_idx=8, double dx0=.0,
-                   double dx_max=0, double dx_min=0):
+                   double dx_max=0, double dx_min=0, int nsteps=0):
         cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty(
             (xout.size, y0.size), dtype=np.float64)
         if y0.size < self.thisptr.ny:
@@ -51,7 +51,7 @@ cdef class GslOdeiv2:
         self.success = True
         try:
             self.thisptr.predefined(<PyObject*>xout, <PyObject*> yout, atol,
-                                    rtol, step_type_idx, dx0, dx_max, dx_min)
+                                    rtol, step_type_idx, dx0, dx_min, dx_max, nsteps)
         except:
             self.success = False
             raise
@@ -114,21 +114,21 @@ requires_jac = (
 
 
 def adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol, dx_min=.0, dx_max=.0,
-             nderiv=0, method='bsimp'):
-    cdef size_t nsteps
+             nsteps=0, nderiv=0, method='bsimp'):
+    cdef size_t steps_taken
     if method in requires_jac and jac is None:
         raise ValueError("Method requires explicit jacobian callback")
     integr = GslOdeiv2(rhs, jac, len(y0))
-    nsteps = integr.adaptive(np.array(y0, dtype=np.float64),
+    steps_taken = integr.adaptive(np.array(y0, dtype=np.float64),
                              x0, xend, atol, rtol,
                              steppers.index(method),
-                             dx0, dx_min, dx_max)
-    xout = integr.get_xout(nsteps)
-    return xout, integr.post_process(xout, integr.get_yout(nsteps), nderiv), integr.get_info()
+                             dx0, dx_min, dx_max, nsteps)
+    xout = integr.get_xout(steps_taken)
+    return xout, integr.post_process(xout, integr.get_yout(steps_taken), nderiv), integr.get_info()
 
 
 def predefined(rhs, jac, y0, xout, dx0, atol, rtol, dx_min=.0, dx_max=.0,
-               nderiv=0, method='bsimp'):
+               nsteps=0, nderiv=0, method='bsimp'):
     if method in requires_jac and jac is None:
         raise ValueError("Method requires explicit jacobian callback")
     integr = GslOdeiv2(rhs, jac, len(y0))
@@ -136,5 +136,5 @@ def predefined(rhs, jac, y0, xout, dx0, atol, rtol, dx_min=.0, dx_max=.0,
     yout = integr.predefined(np.asarray(y0, dtype=np.float64),
                              xout,
                              atol, rtol, steppers.index(method),
-                             dx0, dx_min, dx_max)
+                             dx0, dx_min, dx_max, nsteps)
     return integr.post_process(xout, yout, nderiv), integr.get_info()

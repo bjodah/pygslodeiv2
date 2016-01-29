@@ -86,6 +86,8 @@ def test_integrate_adaptive(method, forgiveness):
     if method in requires_jac:
         assert info['njev'] > 0
 
+    integrate_adaptive(f, j, y0, nsteps=1, **kwargs)
+
 
 @pytest.mark.parametrize("method,forgiveness", methods)
 def test_integrate_predefined(method, forgiveness):

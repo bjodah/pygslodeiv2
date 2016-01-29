@@ -1,3 +1,7 @@
+v0.6.0
+======
+- ``nsteps`` kwarg added (maximum number of steps).
+
 v0.5.0
 ======
 - Changes to info dict: rename 'nrhs' -> 'nfev', 'njac' -> 'njev', added 'cpu_time', 'success'
