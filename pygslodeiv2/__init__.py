@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Python binding for odeiv2 in GNU Scientific Library (GSL).
+"""
 
 from __future__ import division, absolute_import
 
