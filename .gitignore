@@ -10,3 +10,4 @@ MANIFEST
 pygslodeiv2/_gslodeiv2_numpy.c
 doc/
 **/.ipynb_checkpoints/
+**.egg-info

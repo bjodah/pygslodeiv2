@@ -1,6 +1,7 @@
-v0.6.0
+v0.5.1
 ======
 - ``nsteps`` kwarg added (maximum number of steps).
+- More robust setup.py
 
 v0.5.0
 ======
