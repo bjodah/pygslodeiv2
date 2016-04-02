@@ -1,30 +1,30 @@
 package:
-    name: pygslodeiv2
-    version: 0.6.0.git
+  name: pygslodeiv2
+  version: 0.6.0.git
 
 source:
-    path: ../
+  path: ../
 
 build:
-    number: 0
+  number: 0
 
 requirements:
-    build:
-        - python
-        - numpy
-        - gsl
-        - cython
-    run:
-        - numpy
-        - python
-        - gsl
+  build:
+    - python
+    - numpy
+    - gsl
+    - cython
+  run:
+    - numpy
+    - python
+    - gsl
 
 test:
-    imports:
-        - pygslodeiv2
-    requires:
-        - pytest
+  imports:
+    - pygslodeiv2
+  requires:
+    - pytest
 
 about:
-    home: https://github.com/bjodah/pygslodeiv2
-    license: GNU GPL v3
+  home: https://github.com/bjodah/pygslodeiv2
+  license: GNU GPL v3
