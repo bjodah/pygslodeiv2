@@ -3,6 +3,7 @@
 
 # Tested with GSL v1.16 and v2.1
 
+import io
 import os
 import shutil
 import sys
@@ -73,17 +74,18 @@ tests = [
     'pygslodeiv2.tests',
 ]
 
-with open(_path_under_setup(pkg_name, '__init__.py'), 'rt') as f:
+with io.open(_path_under_setup(pkg_name, '__init__.py'),
+             'rt', encoding='utf-8') as f:
     short_description = f.read().split('"""')[1].split('\n')[1]
 assert 10 < len(short_description) < 255
-long_description = open(_path_under_setup('README.rst')).read()
-assert len(long_description) > 100
+long_descr = io.open(_path_under_setup('README.rst'), encoding='utf-8').read()
+assert len(long_descr) > 100
 
 setup_kwargs = dict(
     name=pkg_name,
     version=__version__,
     description=short_description,
-    long_description=long_description,
+    long_description=long_descr,
     classifiers=classifiers,
     author='Björn Dahlgren',
     author_email='bjodah@DELETEMEgmail.com',
