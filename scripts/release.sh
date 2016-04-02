@@ -35,7 +35,7 @@ MD5=$(md5sum dist/${PKG}-$VERSION.tar.gz | cut -f1 -d' ')
 cp -r conda-recipe/ dist/conda-recipe-$VERSION
 sed -i -E \
     -e "s/version:(.+)/version: $VERSION/" \
-    -e "s/path:(.+)/fn: $PKG-$VERSION.tar.gz\n    url: https:\/\/pypi.python.org\/packages\/source\/${PKG:0:1}\/$PKG\/$PKG-$VERSION.tar.gz#md5=$MD5\n    md5: $MD5/" \
+    -e "s/path:(.+)/fn: $PKG-$VERSION.tar.gz\n  url: https:\/\/pypi.python.org\/packages\/source\/${PKG:0:1}\/$PKG\/$PKG-$VERSION.tar.gz#md5=$MD5\n  md5: $MD5/" \
     -e "/cython/d" \
     dist/conda-recipe-$VERSION/meta.yaml
 
