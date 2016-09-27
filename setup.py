@@ -18,7 +18,7 @@ def _path_under_setup(*args):
     return os.path.join(os.path.dirname(__file__), *args)
 
 USE_CYTHON = os.path.exists(_path_under_setup(
-    'pygslodeiv2', '_gslodeiv2_numpy.pyx'))
+    'pygslodeiv2', '_gsl_odeiv2_numpy.pyx'))
 
 # Cythonize .pyx file if it exists (not in source distribution)
 ext_modules = []
@@ -28,19 +28,18 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
     import numpy as np
     ext = '.pyx' if USE_CYTHON else '.cpp'
     ext_modules = [
-        Extension('pygslodeiv2._gslodeiv2_numpy',
-                  ['pygslodeiv2/_gslodeiv2_numpy'+ext],
+        Extension('pygslodeiv2._gsl_odeiv2_numpy',
+                  ['pygslodeiv2/_gsl_odeiv2_numpy'+ext],
                   language='c++', extra_compile_args=['-std=c++11'],
                   libraries=['gsl', 'gslcblas', 'm'],
-                  include_dirs=['./include', np.get_include()])
+                  include_dirs=['pygslodeiv2/include', np.get_include()])
     ]
     if USE_CYTHON:
         from Cython.Build import cythonize
-        ext_modules = cythonize(
-            ext_modules, include_path=[_path_under_setup('include')],
-            gdb_debug=True)
+        ext_modules = cythonize(ext_modules, include_path=[
+            os.path.join('pygslodeiv2', 'include')], gdb_debug=True)
 
-RELEASE_VERSION = os.environ.get('PYGSLODEIV2_RELEASE_VERSION', '')
+RELEASE_VERSION = os.environ.get('%s_RELEASE_VERSION' % pkg_name.upper(), '')
 
 # http://conda.pydata.org/docs/build.html#environment-variables-set-during-the-build-process
 CONDA_BUILD = os.environ.get('CONDA_BUILD', '0') == '1'
@@ -92,8 +91,10 @@ setup_kwargs = dict(
     url='https://github.com/bjodah/' + pkg_name,
     license='GPLv3',
     packages=[pkg_name] + tests,
+    include_package_data=True,
     install_requires=['numpy'] + (['cython'] if USE_CYTHON else []),
     setup_requires=['numpy'] + (['cython'] if USE_CYTHON else []),
+    extras_require={'docs': ['Sphinx', 'sphinx_rtd_theme']},
     ext_modules=ext_modules,
 )
 

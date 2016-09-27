@@ -5,9 +5,15 @@ Python binding for odeiv2 in GNU Scientific Library (GSL).
 
 from __future__ import division, absolute_import
 
-from ._gslodeiv2_numpy import adaptive, predefined, requires_jac, steppers
+from ._gsl_odeiv2_numpy import adaptive, predefined, requires_jac, steppers
 from ._util import _check_callable, _check_indexing
 from ._release import __version__
+
+
+def get_include():
+    from pkg_resources import resource_filename, Requirement
+    return resource_filename(Requirement.parse(__name__),
+                             '%s/include' % __name__)
 
 
 def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,

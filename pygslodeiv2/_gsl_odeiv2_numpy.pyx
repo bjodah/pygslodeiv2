@@ -1,12 +1,18 @@
 # -*- coding: utf-8; mode: cython -*-
 
 from cpython.object cimport PyObject
+from libcpp.string cimport string
+
 cimport numpy as cnp
 import numpy as np
 
-from gslodeiv2_numpy cimport PyGslOdeiv2
+from gsl_odeiv2_cxx cimport styp_from_name
+from gsl_odeiv2_numpy cimport PyGslOdeiv2
 
 cnp.import_array()  # Numpy C-API initialization
+
+requires_jac = ('rk1imp', 'rk2imp', 'rk4imp', 'bsimp', 'msbdf')
+steppers = requires_jac + ('rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'msadams')
 
 cdef class GslOdeiv2:
 
@@ -23,7 +29,7 @@ cdef class GslOdeiv2:
 
     def adaptive(self, cnp.ndarray[cnp.float64_t, ndim=1] y0,
                  double t0, double tend, double atol, double rtol,
-                 int step_type_idx=8, double dx0=.0, double dx_min=.0,
+                 str method='bsimp', double dx0=.0, double dx_min=.0,
                  double dx_max=.0, int nsteps=0):
         if y0.size < self.thisptr.ny:
             raise ValueError("y0 too short")
@@ -31,15 +37,18 @@ cdef class GslOdeiv2:
             raise ValueError("dx must be > 0")
         self.success = False
         try:
-            return self.thisptr.adaptive(<PyObject*>y0, t0, tend, atol,
-                                         rtol, step_type_idx, dx0, dx_min, dx_max, nsteps)
+            xout, yout = self.thisptr.adaptive(<PyObject*>y0, t0, tend, atol, rtol,
+                                               styp_from_name(method.upper().encode('UTF-8')),
+                                               dx0, dx_min, dx_max, nsteps)
         except:
-            self.success = False
             raise
+        else:
+            self.success = True
+        return np.asarray(xout), np.asarray(yout).reshape((len(xout), self.thisptr.ny))
 
     def predefined(self, cnp.ndarray[cnp.float64_t, ndim=1] y0,
                    cnp.ndarray[cnp.float64_t, ndim=1] xout,
-                   double atol, double rtol, int step_type_idx=8, double dx0=.0,
+                   double atol, double rtol, str method='bsimp', double dx0=.0,
                    double dx_max=0, double dx_min=0, int nsteps=0):
         cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty(
             (xout.size, y0.size), dtype=np.float64)
@@ -48,31 +57,15 @@ cdef class GslOdeiv2:
         if dx0 <= 0.0:
             raise ValueError("dx must be > 0")
         yout[0, :] = y0
-        self.success = True
+        self.success = False
         try:
             self.thisptr.predefined(<PyObject*>xout, <PyObject*> yout, atol,
-                                    rtol, step_type_idx, dx0, dx_min, dx_max, nsteps)
+                                    rtol, styp_from_name(method.upper().encode('UTF-8')),
+                                    dx0, dx_min, dx_max, nsteps)
         except:
-            self.success = False
             raise
-        return yout
-
-    def get_xout(self, size_t nsteps):
-        cdef cnp.ndarray[cnp.float64_t, ndim=1] xout = np.empty(
-            nsteps, dtype=np.float64)
-        cdef size_t i
-        for i in range(nsteps):
-            xout[i] = self.thisptr.xout[i]
-        return xout
-
-    def get_yout(self, size_t nsteps):
-        cdef cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((
-            nsteps, self.thisptr.ny), dtype=np.float64)
-        cdef size_t i
-        cdef size_t ny = self.thisptr.ny
-        for i in range(nsteps):
-            for j in range(ny):
-                yout[i, j] = self.thisptr.yout[i*ny + j]
+        else:
+            self.success = True
         return yout
 
     def post_process(self, cnp.ndarray[cnp.float64_t, ndim=1] xout,
@@ -98,43 +91,33 @@ cdef class GslOdeiv2:
     def get_info(self):
         return {
             'success': self.success,
-            'nfev': self.thisptr.nrhs,
-            'njev': self.thisptr.njac,
-            'time_cpu': self.thisptr.time_cpu
+            'nfev': self.thisptr.nfev,
+            'njev': self.thisptr.njev,
+            'time_cpu': self.thisptr.time_cpu,
+            'time_wall': self.thisptr.time_wall
         }
-
-
-steppers = (
-    'rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
-    'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf'
-)
-requires_jac = (
-    'rk1imp', 'rk2imp', 'rk4imp', 'bsimp', 'msbdf'
-)
 
 
 def adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol, dx_min=.0, dx_max=.0,
              nsteps=0, nderiv=0, method='bsimp'):
     cdef size_t steps_taken
-    if method in requires_jac and jac is None:
+    if method.lower() in requires_jac and jac is None:
         raise ValueError("Method requires explicit jacobian callback")
     integr = GslOdeiv2(rhs, jac, len(y0))
-    steps_taken = integr.adaptive(np.array(y0, dtype=np.float64),
-                             x0, xend, atol, rtol,
-                             steppers.index(method),
+    xout, yout = integr.adaptive(np.array(y0, dtype=np.float64),
+                             x0, xend, atol, rtol, method,
                              dx0, dx_min, dx_max, nsteps)
-    xout = integr.get_xout(steps_taken)
-    return xout, integr.post_process(xout, integr.get_yout(steps_taken), nderiv), integr.get_info()
+    return xout, integr.post_process(xout, yout, nderiv), integr.get_info()
 
 
 def predefined(rhs, jac, y0, xout, dx0, atol, rtol, dx_min=.0, dx_max=.0,
                nsteps=0, nderiv=0, method='bsimp'):
-    if method in requires_jac and jac is None:
+    if method.lower() in requires_jac and jac is None:
         raise ValueError("Method requires explicit jacobian callback")
     integr = GslOdeiv2(rhs, jac, len(y0))
     xout = np.asarray(xout, dtype=np.float64)
     yout = integr.predefined(np.asarray(y0, dtype=np.float64),
                              xout,
-                             atol, rtol, steppers.index(method),
+                             atol, rtol, method,
                              dx0, dx_min, dx_max, nsteps)
     return integr.post_process(xout, yout, nderiv), integr.get_info()

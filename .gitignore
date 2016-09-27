@@ -4,10 +4,11 @@
 build/
 dist/
 cython_debug/
-pygslodeiv2/_gslodeiv2_numpy.cpp
+pygslodeiv2/_gsl_odeiv2_numpy.c*
 MANIFEST
 .cache/
-pygslodeiv2/_gslodeiv2_numpy.c
 doc/
 **/.ipynb_checkpoints/
 **.egg-info
+tests/test_gsl_odeiv2_cxx
+tests/catch.hpp
