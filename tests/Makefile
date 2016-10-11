@@ -9,9 +9,10 @@ DEFINES ?=
 
 .PHONY: test clean
 
-test: test_gsl_odeiv2_cxx
+test: test_gsl_odeiv2_anyode test_gsl_odeiv2_cxx _test_gsl_odeiv2_anyode.py
+	./test_gsl_odeiv2_anyode --abortx 1
 	./test_gsl_odeiv2_cxx --abortx 1
-	python3 ./_test_gsl_odeiv2_cxx.py
+	python3 ./_test_gsl_odeiv2_anyode.py
 
 clean:
 	rm catch.hpp

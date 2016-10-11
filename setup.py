@@ -18,7 +18,8 @@ def _path_under_setup(*args):
     return os.path.join(os.path.dirname(__file__), *args)
 
 USE_CYTHON = os.path.exists(_path_under_setup(
-    'pygslodeiv2', '_gsl_odeiv2_numpy.pyx'))
+    pkg_name, '_gsl_odeiv2.pyx'))
+package_include = os.path.join(pkg_name, 'include')
 
 # Cythonize .pyx file if it exists (not in source distribution)
 ext_modules = []
@@ -27,23 +28,26 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
         '--help-commands', 'egg_info', 'clean', '--version'):
     import numpy as np
     ext = '.pyx' if USE_CYTHON else '.cpp'
-    ext_modules = [
-        Extension('pygslodeiv2._gsl_odeiv2_numpy',
-                  ['pygslodeiv2/_gsl_odeiv2_numpy'+ext],
-                  language='c++', extra_compile_args=['-std=c++11'],
-                  libraries=['gsl', 'gslcblas', 'm'],
-                  include_dirs=['pygslodeiv2/include', np.get_include()])
-    ]
+    sources = [os.path.join('pygslodeiv2', '_gsl_odeiv2' + ext)]
+    ext_modules = [Extension('%s._gsl_odeiv2' % pkg_name, sources)]
     if USE_CYTHON:
         from Cython.Build import cythonize
         ext_modules = cythonize(ext_modules, include_path=[
-            os.path.join('pygslodeiv2', 'include')], gdb_debug=True)
+            package_include,
+            os.path.join('external', 'anyode', 'cython_def')
+        ])
+    ext_modules[0].language = 'c++'
+    ext_modules[0].extra_compile_args = ['-std=c++11']
+    ext_modules[0].include_dirs = [
+        np.get_include(), package_include,
+        os.path.join('external', 'anyode', 'include')]
+    ext_modules[0].libraries += ['gsl', 'gslcblas', 'm']
 
-RELEASE_VERSION = os.environ.get('%s_RELEASE_VERSION' % pkg_name.upper(), '')
+_version_env_var = '%s_RELEASE_VERSION' % pkg_name.upper()
+RELEASE_VERSION = os.environ.get(_version_env_var, '')
 
 # http://conda.pydata.org/docs/build.html#environment-variables-set-during-the-build-process
-CONDA_BUILD = os.environ.get('CONDA_BUILD', '0') == '1'
-if CONDA_BUILD:
+if os.environ.get('CONDA_BUILD', '0') == '1':
     try:
         RELEASE_VERSION = 'v' + open(
             '__conda_version__.txt', 'rt').readline().rstrip()
@@ -52,17 +56,17 @@ if CONDA_BUILD:
 
 release_py_path = _path_under_setup(pkg_name, '_release.py')
 
-if (len(RELEASE_VERSION) > 1 and
-   RELEASE_VERSION[0] == 'v'):
+if len(RELEASE_VERSION) > 1:
+    if RELEASE_VERSION[0] != 'v':
+        raise ValueError("$%s does not start with 'v'" % _version_env_var)
     TAGGED_RELEASE = True
     __version__ = RELEASE_VERSION[1:]
-else:
+else:  # read __version__ attribute from _release.py:
     TAGGED_RELEASE = False
-    # read __version__ attribute from _release.py:
     exec(open(release_py_path).read())
 
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     'Operating System :: OS Independent',
     'Topic :: Scientific/Engineering',
@@ -70,7 +74,7 @@ classifiers = [
 ]
 
 tests = [
-    'pygslodeiv2.tests',
+    '%s.tests' % pkg_name,
 ]
 
 with io.open(_path_under_setup(pkg_name, '__init__.py'),

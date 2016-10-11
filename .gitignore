@@ -1,14 +1,16 @@
 **/*.so
 **/__pycache__
 **/*.pyc
+**/*.pyxbldc
 build/
 dist/
 cython_debug/
-pygslodeiv2/_gsl_odeiv2_numpy.c*
+pygslodeiv2/_gsl_odeiv2.c*
 MANIFEST
 .cache/
 doc/
 **/.ipynb_checkpoints/
 **.egg-info
+tests/test_gsl_odeiv2_anyode
 tests/test_gsl_odeiv2_cxx
 tests/catch.hpp

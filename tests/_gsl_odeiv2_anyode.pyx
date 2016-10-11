@@ -4,7 +4,8 @@
 #
 # pyximport ignores the above settings, see _gsl_odeiv2_cxx.pyxbld
 
-from gsl_odeiv2_cxx cimport simple_adaptive, styp_from_name
+from gsl_odeiv2_cxx cimport styp_from_name
+from gsl_odeiv2_anyode cimport simple_adaptive
 
 
 cdef extern from "testing_utils.hpp":
@@ -24,5 +25,5 @@ cdef class PyDecay:
     def adaptive(self, double y0, double t, str stepper_name='msadams'):
         return simple_adaptive[Decay](
             self.thisptr, 1e-10, 1e-10,
-            styp_from_name(stepper_name.upper().encode('UTF-8')),
+            styp_from_name(stepper_name.lower().encode('UTF-8')),
             &y0, 0.0, t)
