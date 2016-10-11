@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstdio>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <unordered_map>
-#include <sstream>
 #include <vector>
 
 #include <gsl/gsl_errno.h>
@@ -169,6 +170,27 @@ namespace gsl_odeiv2_cxx {
         int reset() { return gsl_odeiv2_evolve_reset(m_evolve); }
     };
 
+    void stderr_handle_error(const char * reason,
+                             const char * file,
+                             int line,
+                             int gsl_errno) {
+        std::fprintf(stderr, "GSL Error: %s (in %s, line %d, gsl_errno: %d)", reason, file, line, gsl_errno);
+    }
+
+    struct ErrorHandler {
+        gsl_error_handler_t *m_ori_handler;
+        ErrorHandler() {
+            m_ori_handler = gsl_set_error_handler(&stderr_handle_error);
+        }
+        ~ErrorHandler() {
+            if (m_ori_handler)
+                this->release();
+        }
+        void release() {
+            gsl_set_error_handler(m_ori_handler);
+        }
+    };
+
     struct GSLIntegrator{
         gsl_odeiv2_system m_sys;
         Driver m_drv;
@@ -201,6 +223,7 @@ namespace gsl_odeiv2_cxx {
         adaptive(const double x0,
                  const double xend,
                  const double * const y0){
+            ErrorHandler errh;  // has side-effects;
             std::vector<double> xout;
             std::vector<double> yout;
             double curr_x = x0;
@@ -236,6 +259,7 @@ namespace gsl_odeiv2_cxx {
                         const double * const tout,
                         const double * const y0,
                         double * const yout){
+            ErrorHandler errh;  // has side-effects;
             double curr_t = tout[0];
             this->m_drv.reset();
             std::copy(y0, y0 + (this->ny), yout);
