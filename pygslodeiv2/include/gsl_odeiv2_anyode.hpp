@@ -118,9 +118,9 @@ namespace gsl_odeiv2_anyode {
     {
         if (dx0 == 0.0){
             if (xout[0] == 0)
-                dx0 = std::numeric_limits<double>::epsilon() * 100;
+                dx0 = std::numeric_limits<double>::epsilon() * 1000;
             else
-                dx0 = std::numeric_limits<double>::epsilon() * 100 * xout[0];
+                dx0 = std::numeric_limits<double>::epsilon() * 1000 * xout[0];
         }
         if (mxsteps == 0)
             mxsteps = 500;
