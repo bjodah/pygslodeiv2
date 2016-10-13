@@ -14,3 +14,4 @@ doc/
 tests/test_gsl_odeiv2_anyode
 tests/test_gsl_odeiv2_cxx
 tests/catch.hpp
+tests/test_gsl_odeiv2_anyode_parallel
