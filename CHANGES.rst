@@ -1,3 +1,12 @@
+v0.6.0
+======
+- Changed development status from alpha to beta.
+- Refactored to use AnyODE base class (share code with pycvodes & pygslodeiv2)
+
+v0.5.2
+======
+- Fixes to setu.py
+
 v0.5.1
 ======
 - ``nsteps`` kwarg added (maximum number of steps).
