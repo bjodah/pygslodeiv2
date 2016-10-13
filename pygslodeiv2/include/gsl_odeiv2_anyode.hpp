@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gsl_odeiv2_cxx.hpp"
-
+#include <chrono>
 #include "anyode/anyode.hpp"
+#include "gsl_odeiv2_cxx.hpp"
 
 
 namespace gsl_odeiv2_anyode {
@@ -64,12 +64,13 @@ namespace gsl_odeiv2_anyode {
         return integr;
     }
 
-    void set_integration_info(std::unordered_map<std::string, int>& info,
-                              const GSLIntegrator& integrator){
-        info["n_steps"] = integrator.get_n_steps();
-        info["n_failed_steps"] = integrator.get_n_failed_steps();
+    template <class OdeSys>
+    void set_integration_info(OdeSys * odesys, const GSLIntegrator& integrator){
+        odesys->last_integration_info["nfev"] = odesys->nfev;
+        odesys->last_integration_info["njev"] = odesys->njev;
+        odesys->last_integration_info["n_steps"] = integrator.get_n_steps();
+        odesys->last_integration_info["n_failed_steps"] = integrator.get_n_failed_steps();
     }
-
 
     template <class OdeSys>
     std::pair<std::vector<double>, std::vector<double> >
@@ -95,9 +96,16 @@ namespace gsl_odeiv2_anyode {
             mxsteps = 500;
         auto integr = get_integrator<OdeSys>(odesys, atol, rtol, styp, dx0, dx_min, dx_max, mxsteps);
         odesys->integrator = static_cast<void*>(&integr);
+        std::time_t cput0 = std::clock();
+        auto t_start = std::chrono::high_resolution_clock::now();
+
         auto result = integr.adaptive(x0, xend, y0);
+
+        odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
+        odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(
+                std::chrono::high_resolution_clock::now() - t_start).count();
         odesys->last_integration_info.clear();
-        set_integration_info(odesys->last_integration_info, integr);
+        set_integration_info<OdeSys>(odesys, integr);
         return result;
     }
 
@@ -126,9 +134,16 @@ namespace gsl_odeiv2_anyode {
             mxsteps = 500;
         auto integr = get_integrator<OdeSys>(odesys, atol, rtol, styp, mxsteps, dx0, dx_min, dx_max);
         odesys->integrator = static_cast<void*>(&integr);
+        std::time_t cput0 = std::clock();
+        auto t_start = std::chrono::high_resolution_clock::now();
+
         integr.predefined(nout, xout, y0, yout);
+
+        odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
+        odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(
+                std::chrono::high_resolution_clock::now() - t_start).count();
         odesys->last_integration_info.clear();
-        set_integration_info(odesys->last_integration_info, integr);
+        set_integration_info<OdeSys>(odesys, integr);
     }
 
 }
