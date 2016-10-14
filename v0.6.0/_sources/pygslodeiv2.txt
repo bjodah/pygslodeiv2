@@ -1,10 +1,8 @@
 pygslodeiv2 package
 ===================
 
-Module contents
----------------
-
 .. automodule:: pygslodeiv2
     :members:
     :undoc-members:
     :show-inheritance:
+
