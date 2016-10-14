@@ -1,7 +1,7 @@
 #!/bin/bash -xeu
 # Usage:
 #
-#    $ ./scripts/release.sh v1.2.3 ~/anaconda2/bin myserver.example.com
+#    $ ./scripts/release.sh v1.2.3 ~/anaconda2/bin myserver.example.com GITHUB_USER GITHUB_REPO
 #
 
 if [[ $1 != v* ]]; then
@@ -11,6 +11,10 @@ fi
 VERSION=${1#v}
 CONDA_PATH=$2
 SERVER=$3
+find . -type f -iname "*.pyc" -exec rm {} +
+find . -type f -iname "*.o" -exec rm {} +
+find . -type f -iname "*.so" -exec rm {} +
+find . -type d -name "__pycache__" -exec rmdir {} +
 ./scripts/check_clean_repo_on_master.sh
 cd $(dirname $0)/..
 # PKG will be name of the directory one level up containing "__init__.py" 
@@ -19,9 +23,10 @@ PKG=$(find . -maxdepth 2 -name __init__.py -print0 | xargs -0 -n1 dirname | xarg
 PKG_UPPER=$(echo $PKG | tr '[:lower:]' '[:upper:]')
 ./scripts/run_tests.sh
 env ${PKG_UPPER}_RELEASE_VERSION=v$VERSION python setup.py sdist
-env ${PKG_UPPER}_RELEASE_VERSION=v$VERSION ./scripts/generate_docs.sh
+env ${PKG_UPPER}_RELEASE_VERSION=v$VERSION ./scripts/generate_docs.sh $4 $5 v$VERSION
 for CONDA_PY in 2.7 3.4 3.5; do
     for CONDA_NPY in 1.11; do
+        continue  # we build the conda recipe on another host for now..
         PATH=$CONDA_PATH:$PATH ./scripts/build_conda_recipe.sh v$VERSION --python $CONDA_PY --numpy $CONDA_NPY
     done
 done
@@ -31,21 +36,14 @@ git tag -a v$VERSION -m v$VERSION
 git push
 git push --tags
 twine upload dist/${PKG}-$VERSION.tar.gz
-MD5=$(md5sum dist/${PKG}-$VERSION.tar.gz | cut -f1 -d' ')
-cp -r conda-recipe/ dist/conda-recipe-$VERSION
-sed -i -E \
-    -e "s/version:(.+)/version: $VERSION/" \
-    -e "s/path:(.+)/fn: $PKG-$VERSION.tar.gz\n  url: https:\/\/pypi.python.org\/packages\/source\/${PKG:0:1}\/$PKG\/$PKG-$VERSION.tar.gz#md5=$MD5\n  md5: $MD5/" \
-    -e "/cython/d" \
-    dist/conda-recipe-$VERSION/meta.yaml
 
-env ${PKG_UPPER}_RELEASE_VERSION=v$VERSION python setup.py upload_sphinx
-
-# Specific for this project:
-scp -r dist/conda-recipe-$VERSION/ $PKG@$SERVER:~/public_html/conda-recipes/
-scp dist/${PKG}-$VERSION.tar.gz $PKG@$SERVER:~/public_html/releases/
-for CONDA_PY in 2.7 3.4 3.5; do
-    for CONDA_NPY in 1.11; do
-        ssh $PKG@$SERVER "source /etc/profile; conda-build --python $CONDA_PY --numpy $CONDA_NPY ~/public_html/conda-recipes/conda-recipe-$VERSION/"
-    done
-done
+set +x
+echo ""
+echo "    You may now create a new github release at with the tag \"v$VERSION\" and name "
+echo "    it \"${PKG}-${VERSION}\", (don't foreget to manually attach the new .tar.gz"
+echo "    file from the ./dist/ directory). Here is a link:"
+echo "        https://github.com/$4/$5/releases/new "
+echo "    Then run:"
+echo ""
+echo "        $ ./scripts/post_release.sh $1 $SERVER $4"
+echo ""
