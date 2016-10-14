@@ -1,0 +1,6 @@
+def make_ext(modname, pyxfilename):
+    from Cython.Build import cythonize
+    ext = cythonize([pyxfilename], include_path=['../include', '../external/anyode/cython_def'])[0]
+    ext.libraries = ['gsl', 'gslcblas', 'm']
+    ext.include_dirs=['../include', '../external/anyode/include']
+    return ext

@@ -1,9 +1,12 @@
+{% set name = "pygslodeiv2" %}
+{% set version = "0.6.0.git" %}
+
 package:
-  name: pygslodeiv2
-  version: 0.6.0.git
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
-  path: ../
+  git_url: ../
 
 build:
   number: 0
@@ -15,16 +18,25 @@ requirements:
     - gsl
     - cython
   run:
-    - numpy
     - python
+    - numpy
     - gsl
 
 test:
   imports:
-    - pygslodeiv2
+    - {{ name }}
   requires:
     - pytest
+  commands:
+    - python -m pytest --pyargs {{ name }}
 
 about:
-  home: https://github.com/bjodah/pygslodeiv2
-  license: GNU GPL v3
+  home: https://github.com/bjodah/{{ name }}
+  license: GPL-3.0
+  license_file: LICENSE
+  summary: 'Python binding for odeiv2 interface from GNU Scientific Library (GSL)'
+  doc_url: https://bjodah.github.io/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - bjodah
