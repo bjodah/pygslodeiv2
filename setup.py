@@ -7,6 +7,8 @@ import io
 import os
 import shutil
 import sys
+import warnings
+
 from setuptools import setup
 from setuptools.extension import Extension
 
@@ -41,7 +43,16 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
     ext_modules[0].include_dirs = [
         np.get_include(), package_include,
         os.path.join('external', 'anyode', 'include')]
-    ext_modules[0].libraries += ['gsl', 'gslcblas', 'm']
+    libs = ['gsl']
+    LBLAS = os.environ.get('LBLAS')
+    if LBLAS is None:
+        libs.append('gslcblas')
+    elif LBLAS == '':
+        warnings.warn("LBLAS=='', %s will most probably not work" % pkg_name)
+    else:
+        libs.append(LBLAS)
+    libs.append('m')
+    ext_modules[0].libraries += libs
 
 _version_env_var = '%s_RELEASE_VERSION' % pkg_name.upper()
 RELEASE_VERSION = os.environ.get(_version_env_var, '')

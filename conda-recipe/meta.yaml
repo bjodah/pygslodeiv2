@@ -35,7 +35,7 @@ about:
   license: GPL-3.0
   license_file: LICENSE
   summary: 'Python binding for odeiv2 interface from GNU Scientific Library (GSL)'
-  doc_url: https://bjodah.github.io/{{ name }}
+  doc_url: https://bjodah.github.io/{{ name }}/latest
 
 extra:
   recipe-maintainers:
