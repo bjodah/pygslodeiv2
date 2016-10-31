@@ -122,6 +122,7 @@ namespace gsl_odeiv2_cxx {
         int set_min_step(double hmin) { return gsl_odeiv2_driver_set_hmin(m_driver, hmin); }
         int set_max_step(double hmax) { return gsl_odeiv2_driver_set_hmax(m_driver, hmax); }
         int set_max_num_steps(const unsigned long int nmax) { return gsl_odeiv2_driver_set_nmax(m_driver, nmax); }
+        unsigned long int get_max_num_steps() { return m_driver->nmax; }
         int apply(double * t, const double t1, double y[]){
             return gsl_odeiv2_driver_apply(m_driver, t, t1, y);
         }
@@ -199,7 +200,7 @@ namespace gsl_odeiv2_cxx {
         Evolve m_evo;
         int ny;
         GSLIntegrator(RhsFn rhs_cb, JacFn jac_cb, int ny, const StepType styp,
-                      double dx0, double atol, double rtol, void * user_data) :
+                      double dx0, double atol, double rtol, void * user_data, int mxsteps=500) :
             m_sys(gsl_odeiv2_system({rhs_cb, jac_cb, static_cast<std::size_t>(ny), user_data})),
             m_drv(Driver(&(m_sys), styp, dx0, atol, rtol)),
             m_stp(Step(styp, ny)),
@@ -210,6 +211,7 @@ namespace gsl_odeiv2_cxx {
             this->m_stp.set_driver(this->m_drv);
             this->m_ctrl.set_driver(this->m_drv);
             this->m_evo.set_driver(this->m_drv);
+            this->m_drv.set_max_num_steps(mxsteps);
         }
 
         int get_n_steps() const {
@@ -222,15 +224,29 @@ namespace gsl_odeiv2_cxx {
         std::pair<std::vector<double>, std::vector<double> >
         adaptive(const double x0,
                  const double xend,
-                 const double * const y0){
+                 const double * const y0,
+                 int autorestart=0,
+                 bool return_on_error=false){
             ErrorHandler errh;  // has side-effects;
+            unsigned idx = 0;
+            const unsigned long int mxsteps = this->m_drv.get_max_num_steps();
             std::vector<double> xout;
             std::vector<double> yout;
             double curr_x = x0;
             double curr_dx = this->m_drv.m_driver->h;
             xout.push_back(curr_x);
             yout.insert(yout.end(), y0, y0 + ny);
+            if (curr_x == xend)
+                goto done;
             while (curr_x < xend){
+                idx++;
+                if (idx > mxsteps){
+                    if (return_on_error)
+                        break;
+                    else
+                        throw std::runtime_error(StreamFmt() << std::scientific << "Maximum number of steps reached (at t="
+                                                 << curr_x <<"): " << mxsteps);
+                }
                 if (curr_dx > this->m_drv.m_driver->hmax){
                     curr_dx = this->m_drv.m_driver->hmax;
                 } else if (curr_dx < this->m_drv.m_driver->hmin ) {
@@ -239,19 +255,36 @@ namespace gsl_odeiv2_cxx {
                 yout.insert(yout.end(), yout.end() - ny, yout.end());
                 int info = this->m_evo.apply(this->m_ctrl, this->m_stp, &(this->m_sys),
                                              &curr_x, xend, &curr_dx, &(*(yout.end() - ny)));
-                if (info == GSL_SUCCESS)
+                if (info == GSL_SUCCESS) {
                     ;
-                else if (info == GSL_FAILURE)
-                    throw std::runtime_error(StreamFmt() << std::scientific
-                        << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
-                        << " with stepsize=" << curr_dx << " (step size too small).");
-                else
-                    throw std::runtime_error(StreamFmt() << std::scientific
-                        << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
-                        << " with stepsize=" << curr_dx
-                        << " (unknown error code: "<< info << ").");
+                } else if (autorestart) {
+                    this->m_evo.reset();
+                    this->m_drv.set_max_num_steps(mxsteps - idx);
+                    const double last_x = xout.back();
+                    xout.pop_back();
+                    auto inner = this->adaptive(0, xend - last_x, &yout[idx-1], autorestart-1, return_on_error);
+                    for (const auto& v : inner.first)
+                        xout.push_back(v + last_x);
+                    yout.insert(yout.end(), inner.second.begin() + ny, inner.second.end());
+                    this->m_drv.set_max_num_steps(mxsteps);
+                    break;
+                } else {
+                    if (return_on_error)
+                        break;
+                    else if (info == GSL_FAILURE) {
+                        throw std::runtime_error(StreamFmt() << std::scientific
+                                                 << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
+                                                 << " with stepsize=" << curr_dx << " (step size too small).");
+                    } else {
+                        throw std::runtime_error(StreamFmt() << std::scientific
+                                                 << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
+                                                 << " with stepsize=" << curr_dx
+                                                 << " (unknown error code: "<< info << ").");
+                    }
+                }
                 xout.push_back(curr_x);
             }
+        done:
             return std::pair<std::vector<double>, std::vector<double>>(xout, yout);
         }
 

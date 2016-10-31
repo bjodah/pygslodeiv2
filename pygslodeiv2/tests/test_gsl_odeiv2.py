@@ -85,7 +85,10 @@ def test_integrate_adaptive(method, forgiveness):
     if method in requires_jac:
         assert info['njev'] > 0
 
-    integrate_adaptive(f, j, y0, nsteps=1, **kwargs)
+    with pytest.raises(RuntimeError) as excinfo:
+        integrate_adaptive(f, j, y0, nsteps=7, **kwargs)
+    assert 'steps' in str(excinfo.value).lower()
+    assert '7' in str(excinfo.value).lower()
 
 
 @pytest.mark.parametrize("method,forgiveness", methods)
@@ -159,3 +162,22 @@ def test_bad_j():
                                           check_indexing=False,
                                           **decay_defaults)
         assert yout  # silence pyflakes
+
+
+def test_adaptive_return_on_error():
+    k = k0, k1, k2 = 2.0, 3.0, 4.0
+    y0 = [0.7, 0.3, 0.5]
+    atol, rtol = 1e-8, 1e-8
+    kwargs = dict(x0=0, xend=3, dx0=1e-10, atol=atol, rtol=rtol,
+                  method='bsimp')
+    f, j = _get_f_j(k)
+    xout, yout, info = integrate_adaptive(f, j, y0, nsteps=7, return_on_error=True, **kwargs)
+    yref = decay_get_Cref(k, y0, xout)
+    assert np.allclose(yout, yref, rtol=10*rtol, atol=10*atol)
+    assert xout.size > 2
+    assert xout[-1] > 1e-6
+    assert yout.shape[0] == xout.size
+    assert info['nfev'] > 0
+    assert info['njev'] > 0
+    assert info['success'] is False
+    assert xout[-1] < kwargs['xend']  # obviously not strict

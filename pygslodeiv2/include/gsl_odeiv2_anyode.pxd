@@ -1,5 +1,6 @@
 # -*- coding: utf-8; mode: cython -*-
 
+from libcpp cimport bool
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 
@@ -18,7 +19,9 @@ cdef extern from "gsl_odeiv2_anyode.hpp" namespace "gsl_odeiv2_anyode":
         const long int,
         const double,
         const double,
-        const double
+        const double,
+        int,
+        bool
     ) except +
 
     cdef void simple_predefined[U](

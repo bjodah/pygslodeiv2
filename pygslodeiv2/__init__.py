@@ -21,7 +21,7 @@ def get_include():
 def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
                        dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                        check_callable=False, check_indexing=False,
-                       cb_kwargs=None):
+                       autorestart=0, return_on_error=False, cb_kwargs=None):
     """
     Integrates a system of ordinary differential equations.
 
@@ -59,7 +59,10 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         perform item setting sanity checks on ``rhs`` and ``jac``.
     cb_kwargs: dict
         Extra keyword arguments passed to ``rhs`` and ``jac``.
-
+    autorestart : int
+        Autorestarts on error (requires autonomous system).
+    return_on_error : bool
+        Instead of raising an exception return silently (see info['success']).
     Returns
     -------
     (xout, yout, info):
@@ -78,7 +81,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
 
     return adaptive(rhs, jac, np.ascontiguousarray(y0, dtype=np.float64), x0,
                     xend, atol, rtol, method, nsteps, dx0, dx_min, dx_max,
-                    cb_kwargs)
+                    autorestart, return_on_error, cb_kwargs)
 
 
 def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,

@@ -11,9 +11,10 @@ OPENMP_LIB ?= -lgomp
 
 .PHONY: test clean
 
-test: test_gsl_odeiv2_anyode test_gsl_odeiv2_anyode_parallel test_gsl_odeiv2_cxx _test_gsl_odeiv2_anyode.py
+test: test_gsl_odeiv2_anyode test_gsl_odeiv2_anyode_parallel test_gsl_odeiv2_anyode_autorestart test_gsl_odeiv2_cxx _test_gsl_odeiv2_anyode.py
 	./test_gsl_odeiv2_anyode --abortx 1
 	./test_gsl_odeiv2_anyode_parallel --abortx 1
+	./test_gsl_odeiv2_anyode_autorestart --abortx 1
 	./test_gsl_odeiv2_cxx --abortx 1
 	python3 ./_test_gsl_odeiv2_anyode.py
 

@@ -1,6 +1,7 @@
 # -*- mode: cython -*-
 # -*- coding: utf-8 -*-
 
+from libcpp cimport bool
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from gsl_odeiv2_cxx cimport StepType
@@ -18,6 +19,8 @@ cdef extern from "gsl_odeiv2_anyode_parallel.hpp" namespace "gsl_odeiv2_anyode_p
         double,
         double,
         double,
+        int,
+        bool
     ) nogil except +
 
     cdef vector[pair[vector[int], vector[double]]] multi_predefined[U](
