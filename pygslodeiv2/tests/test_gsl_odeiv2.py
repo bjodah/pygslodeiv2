@@ -114,6 +114,8 @@ def test_integrate_predefined(method, forgiveness):
                        rtol=forgiveness*rtol,
                        atol=forgiveness*atol)
     assert info['nfev'] > 0
+    assert info['time_cpu'] > 1e-9
+    assert info['time_wall'] > 1e-9
     if method in requires_jac:
         assert info['njev'] > 0
 
