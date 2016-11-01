@@ -22,8 +22,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
                        dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                        check_callable=False, check_indexing=False,
                        autorestart=0, return_on_error=False, cb_kwargs=None):
-    """
-    Integrates a system of ordinary differential equations.
+    """ Integrates a system of ordinary differential equations (solver chosen output).
 
     Parameters
     ----------
@@ -63,6 +62,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         Autorestarts on error (requires autonomous system).
     return_on_error : bool
         Instead of raising an exception return silently (see info['success']).
+
     Returns
     -------
     (xout, yout, info):
@@ -70,6 +70,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         yout: 2-dimensional array of the dependent variables (axis 1) for
             values corresponding to xout (axis 0)
         info: dictionary with information about the integration
+
     """
     # Sanity checks to reduce risk of having a segfault:
     jac = _ensure_5args(jac)
@@ -88,8 +89,7 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
                          dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                          check_callable=False, check_indexing=False,
                          cb_kwargs=None):
-    """
-    Integrates a system of ordinary differential equations.
+    """ Integrates a system of ordinary differential equations (user chosen output).
 
     Parameters
     ----------
@@ -130,6 +130,7 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
         result: 2-dimensional array of the dependent variables (axis 1) for
             values corresponding to xout (axis 0)
         info: dictionary with information about the integration
+
     """
     # Sanity checks to reduce risk of having a segfault:
     jac = _ensure_5args(jac)
