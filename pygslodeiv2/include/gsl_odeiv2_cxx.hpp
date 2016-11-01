@@ -36,6 +36,83 @@ namespace {
 
 
 namespace gsl_odeiv2_cxx {
+    std::string get_gslerror_string(int flag){
+        switch(flag){  // from gsl_errno.h
+        case GSL_SUCCESS:
+            return "GSL_SUCCESS";
+        case GSL_FAILURE:
+            return "GSL_FAILURE";
+        case GSL_CONTINUE:
+            return "GSL_CONTINUE (iteration has not converged)";
+        case GSL_EDOM:
+            return "GSL_EDOM (input domain error, e.g sqrt(-1))";
+        case GSL_ERANGE:
+            return "GSL_ERANGE (output range error, e.g. exp(1e100))";
+        case GSL_EFAULT:
+            return "GSL_EFAULT (invalid pointer)";
+        case GSL_EINVAL:
+            return "GSL_EINVAL (invalid argument supplied by user)";
+        case GSL_EFAILED:
+            return "GSL_EFAILED (generic failure)";
+        case GSL_EFACTOR:
+            return "GSL_EFACTOR (factorization failed)";
+        case GSL_ESANITY:
+            return "GSL_ESANITY (sanity check failed - shouldn't happen)";
+        case GSL_ENOMEM:
+            return "GSL_ENOMEM (malloc failed)";
+        case GSL_EBADFUNC:
+            return "GSL_EBADFUNC (problem with user-supplied function)";
+        case GSL_ERUNAWAY:
+            return "GSL_ERUNAWAY (iterative process is out of control)";
+        case GSL_EMAXITER:
+            return "GSL_EMAXITER (exceeded max number of iterations)";
+        case GSL_EZERODIV:
+            return "GSL_EZERODIV (tried to divide by zero)";
+        case GSL_EBADTOL:
+            return "GSL_EBADTOL (user specified an invalid tolerance)";
+        case GSL_ETOL:
+            return "GSL_ETOL (failed to reach the specified tolerance)";
+        case GSL_EUNDRFLW:
+            return "GSL_EUNDRFLW (underflow)";
+        case GSL_EOVRFLW:
+            return "GSL_EOVRFLW (overflow )";
+        case GSL_ELOSS:
+            return "GSL_ELOSS (loss of accuracy)";
+        case GSL_EROUND:
+            return "GSL_EROUND (failed because of roundoff error)";
+        case GSL_EBADLEN:
+            return "GSL_EBADLEN (matrix, vector lengths are not conformant)";
+        case GSL_ENOTSQR:
+            return "GSL_ENOTSQR (matrix not square)";
+        case GSL_ESING:
+            return "GSL_ESING (apparent singularity detected)";
+        case GSL_EDIVERGE:
+            return "GSL_EDIVERGE (integral or series is divergent)";
+        case GSL_EUNSUP:
+            return "GSL_EUNSUP (requested feature is not supported by the hardware)";
+        case GSL_EUNIMPL:
+            return "GSL_EUNIMPL (requested feature not (yet) implemented)";
+        case GSL_ECACHE:
+            return "GSL_ECACHE (cache limit exceeded)";
+        case GSL_ETABLE:
+            return "GSL_ETABLE (table limit exceeded)";
+        case GSL_ENOPROG:
+            return "GSL_ENOPROG (iteration is not making progress towards solution)";
+        case GSL_ENOPROGJ:
+            return "GSL_ENOPROGJ (jacobian evaluations are not improving the solution)";
+        case GSL_ETOLF:
+            return "GSL_ETOLF (cannot reach the specified tolerance in F)";
+        case GSL_ETOLX:
+            return "GSL_ETOLX (cannot reach the specified tolerance in X)";
+        case GSL_ETOLG:
+            return "GSL_ETOLG (cannot reach the specified tolerance in gradient)";
+        case GSL_EOF:
+            return "GSL_EOF (end of file)";
+        default:
+            return StreamFmt() << "Unkown error code " << flag;
+        }
+    }
+
 
     enum class StepType : int {RK2=0, RK4=1, RKF45=2, RKCK=3, RK8PD=4,
             RK1IMP=5, RK2IMP=6, RK4IMP=7, BSIMP=8, MSADAMS=9, MSBDF=10};
@@ -122,6 +199,7 @@ namespace gsl_odeiv2_cxx {
         int set_min_step(double hmin) { return gsl_odeiv2_driver_set_hmin(m_driver, hmin); }
         int set_max_step(double hmax) { return gsl_odeiv2_driver_set_hmax(m_driver, hmax); }
         int set_max_num_steps(const unsigned long int nmax) { return gsl_odeiv2_driver_set_nmax(m_driver, nmax); }
+        unsigned long int get_max_num_steps() { return m_driver->nmax; }
         int apply(double * t, const double t1, double y[]){
             return gsl_odeiv2_driver_apply(m_driver, t, t1, y);
         }
@@ -199,7 +277,7 @@ namespace gsl_odeiv2_cxx {
         Evolve m_evo;
         int ny;
         GSLIntegrator(RhsFn rhs_cb, JacFn jac_cb, int ny, const StepType styp,
-                      double dx0, double atol, double rtol, void * user_data) :
+                      double dx0, double atol, double rtol, void * user_data, int mxsteps=500) :
             m_sys(gsl_odeiv2_system({rhs_cb, jac_cb, static_cast<std::size_t>(ny), user_data})),
             m_drv(Driver(&(m_sys), styp, dx0, atol, rtol)),
             m_stp(Step(styp, ny)),
@@ -210,6 +288,7 @@ namespace gsl_odeiv2_cxx {
             this->m_stp.set_driver(this->m_drv);
             this->m_ctrl.set_driver(this->m_drv);
             this->m_evo.set_driver(this->m_drv);
+            this->m_drv.set_max_num_steps(mxsteps);
         }
 
         int get_n_steps() const {
@@ -218,19 +297,37 @@ namespace gsl_odeiv2_cxx {
         int get_n_failed_steps() const {
             return this->m_evo.m_evolve->failed_steps;
         }
-
+        void unsuccessful_step_throw_(int flag, double current_time, double last_step){
+            throw std::runtime_error(StreamFmt() << std::scientific << "Unsuccessful step (t="
+                                     << current_time << ", h=" << last_step << "): " <<
+                                     get_gslerror_string(flag));
+        }
         std::pair<std::vector<double>, std::vector<double> >
         adaptive(const double x0,
                  const double xend,
-                 const double * const y0){
+                 const double * const y0,
+                 int autorestart=0,
+                 bool return_on_error=false){
             ErrorHandler errh;  // has side-effects;
+            unsigned idx = 0;
+            const unsigned long int mxsteps = this->m_drv.get_max_num_steps();
             std::vector<double> xout;
             std::vector<double> yout;
             double curr_x = x0;
             double curr_dx = this->m_drv.m_driver->h;
             xout.push_back(curr_x);
             yout.insert(yout.end(), y0, y0 + ny);
+            if (curr_x == xend)
+                goto done;
             while (curr_x < xend){
+                idx++;
+                if (idx > mxsteps){
+                    if (return_on_error)
+                        break;
+                    else
+                        throw std::runtime_error(StreamFmt() << std::scientific << "Maximum number of steps reached (at t="
+                                                 << curr_x <<"): " << mxsteps);
+                }
                 if (curr_dx > this->m_drv.m_driver->hmax){
                     curr_dx = this->m_drv.m_driver->hmax;
                 } else if (curr_dx < this->m_drv.m_driver->hmin ) {
@@ -239,19 +336,36 @@ namespace gsl_odeiv2_cxx {
                 yout.insert(yout.end(), yout.end() - ny, yout.end());
                 int info = this->m_evo.apply(this->m_ctrl, this->m_stp, &(this->m_sys),
                                              &curr_x, xend, &curr_dx, &(*(yout.end() - ny)));
-                if (info == GSL_SUCCESS)
+                if (info == GSL_SUCCESS) {
                     ;
-                else if (info == GSL_FAILURE)
-                    throw std::runtime_error(StreamFmt() << std::scientific
-                        << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
-                        << " with stepsize=" << curr_dx << " (step size too small).");
-                else
-                    throw std::runtime_error(StreamFmt() << std::scientific
-                        << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
-                        << " with stepsize=" << curr_dx
-                        << " (unknown error code: "<< info << ").");
+                } else if (autorestart) {
+                    this->m_stp.reset();
+                    this->m_evo.reset();
+                    this->m_drv.set_max_num_steps(mxsteps - idx);
+                    const double last_x = xout.back();
+                    xout.pop_back();
+                    auto inner = this->adaptive(0, xend - last_x, &yout[idx-1], autorestart-1, return_on_error);
+                    for (const auto& v : inner.first)
+                        xout.push_back(v + last_x);
+                    yout.insert(yout.end(), inner.second.begin() + ny, inner.second.end());
+                    this->m_drv.set_max_num_steps(mxsteps);
+                    break;
+                } else {
+                    if (return_on_error) {
+                        for (int idx=0; idx<ny; ++idx)
+                            yout.pop_back();
+                        break;
+                    } else if (info == GSL_FAILURE) {
+                        throw std::runtime_error(StreamFmt() << std::scientific
+                                                 << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
+                                                 << " with stepsize=" << curr_dx << " (step size too small).");
+                    } else {
+                        unsuccessful_step_throw_(info, curr_x, curr_dx);
+                    }
+                }
                 xout.push_back(curr_x);
             }
+        done:
             return std::pair<std::vector<double>, std::vector<double>>(xout, yout);
         }
 

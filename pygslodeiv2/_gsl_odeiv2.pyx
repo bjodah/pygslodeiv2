@@ -18,16 +18,17 @@ cnp.import_array()  # Numpy C-API initialization
 requires_jac = ('rk1imp', 'rk2imp', 'rk4imp', 'bsimp', 'msbdf')
 steppers = requires_jac + ('rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'msadams')
 
-cdef dict get_last_info(PyOdeSys * odesys):
+cdef dict get_last_info(PyOdeSys * odesys, success=True):
     info = {str(k.decode('utf-8')): v for k, v in dict(odesys.last_integration_info).items()}
     info.update({str(k.decode('utf-8')): v for k, v in dict(odesys.last_integration_info_dbl).items()})
     info['nfev'] = odesys.nfev
     info['njev'] = odesys.njev
-    info['success'] = True
+    info['success'] = success
     return info
 
-def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, double xend, double atol, double rtol,
-             str method='bsimp', long int nsteps=500, double dx0=0.0, double dx_min=0.0, double dx_max=0.0, cb_kwargs=None):
+def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, double xend, double atol,
+             double rtol, str method='bsimp', long int nsteps=500, double dx0=0.0, double dx_min=0.0,
+             double dx_max=0.0, int autorestart=0, bool return_on_error=False, cb_kwargs=None):
     cdef:
         int ny = y0.shape[y0.ndim - 1]
         PyOdeSys * odesys
@@ -42,8 +43,9 @@ def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, doubl
     try:
         xout, yout = map(np.asarray, simple_adaptive[PyOdeSys](
             odesys, atol, rtol, styp_from_name(method.lower().encode('UTF-8')),
-            &y0[0], x0, xend, nsteps, dx0, dx_min, dx_max))
-        return xout, yout.reshape((xout.size, ny)), get_last_info(odesys)
+            &y0[0], x0, xend, nsteps, dx0, dx_min, dx_max, autorestart, return_on_error))
+        info = get_last_info(odesys, False if return_on_error and xout[-1] != xend else True)
+        return xout, yout.reshape((xout.size, ny)), info
     finally:
         del odesys
 

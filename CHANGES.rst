@@ -1,3 +1,7 @@
+unreleased
+==========
+- adaptive learned two new arguments: ``autorestart`` & ``return_on_error``.
+
 v0.6.0
 ======
 - Changed development status from alpha to beta.

@@ -23,7 +23,9 @@ namespace gsl_odeiv2_anyode_parallel {
                    const long int mxsteps=0,
                    const double dx0=0.0,
                    const double dx_min=0.0,
-                   const double dx_max=0.0
+                   const double dx_max=0.0,
+                   int autorestart=0,
+                   bool return_on_error=false
                    ){
         const int ny = odesys[0]->get_ny();
         const int nsys = odesys.size();
@@ -36,7 +38,7 @@ namespace gsl_odeiv2_anyode_parallel {
             te.run([&]{
                 local_result = simple_adaptive<OdeSys>(
                     odesys[idx], atol, rtol, styp, y0 + idx*ny, t0[idx], tend[idx],
-                    mxsteps, dx0, dx_min, dx_max);
+                    mxsteps, dx0, dx_min, dx_max, autorestart, return_on_error);
             });
             results[idx] = local_result;
         }

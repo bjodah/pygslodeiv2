@@ -84,7 +84,9 @@ namespace gsl_odeiv2_anyode {
                     long int mxsteps=0,
                     double dx0=0.0,
                     const double dx_min=0.0,
-                    const double dx_max=0.0)
+                    const double dx_max=0.0,
+                    int autorestart=0,
+                    bool return_on_error=false)
     {
         if (dx0 == 0.0){
             if (x0 == 0)
@@ -99,7 +101,7 @@ namespace gsl_odeiv2_anyode {
         std::time_t cput0 = std::clock();
         auto t_start = std::chrono::high_resolution_clock::now();
 
-        auto result = integr.adaptive(x0, xend, y0);
+        auto result = integr.adaptive(x0, xend, y0, autorestart, return_on_error);
 
         odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
         odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(
