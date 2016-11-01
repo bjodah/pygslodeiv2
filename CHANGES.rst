@@ -1,5 +1,5 @@
-unreleased
-==========
+v0.6.1
+======
 - adaptive learned two new arguments: ``autorestart`` & ``return_on_error``.
 
 v0.6.0

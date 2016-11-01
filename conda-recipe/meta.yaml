@@ -1,5 +1,5 @@
 {% set name = "pygslodeiv2" %}
-{% set version = "0.6.0.git" %}
+{% set version = "0.7.0.git" %}
 
 package:
   name: {{ name|lower }}
