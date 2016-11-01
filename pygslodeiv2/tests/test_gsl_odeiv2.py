@@ -176,7 +176,7 @@ def test_adaptive_return_on_error():
     xout, yout, info = integrate_adaptive(f, j, y0, nsteps=7, return_on_error=True, **kwargs)
     yref = decay_get_Cref(k, y0, xout)
     assert np.allclose(yout, yref, rtol=10*rtol, atol=10*atol)
-    assert xout.size > 2
+    assert xout.size == 8
     assert xout[-1] > 1e-6
     assert yout.shape[0] == xout.size
     assert info['nfev'] > 0
