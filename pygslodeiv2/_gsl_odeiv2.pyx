@@ -54,10 +54,12 @@ def predefined(rhs, jac,
                cnp.ndarray[cnp.float64_t, mode='c'] y0,
                cnp.ndarray[cnp.float64_t, ndim=1] xout,
                double atol, double rtol, str method='bsimp', int nsteps=500, double dx0=0.0,
-               double dx_min=0.0, double dx_max=0.0, cb_kwargs=None):
+               double dx_min=0.0, double dx_max=0.0, int autorestart=0,
+               bool return_on_error=False, cb_kwargs=None):
     cdef:
         int ny = y0.shape[y0.ndim - 1]
         cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((xout.size, ny))
+        int nreached
         PyOdeSys * odesys
 
     if method in requires_jac and jac is None:
@@ -66,9 +68,11 @@ def predefined(rhs, jac,
         raise ValueError("NaN found in y0")
     odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL, <PyObject *>cb_kwargs, -1, -1, 0)
     try:
-        simple_predefined[PyOdeSys](odesys, atol, rtol, styp_from_name(method.lower().encode('UTF-8')), &y0[0],
-                                    xout.size, &xout[0], <double *>yout.data, nsteps,
-                                    dx0, dx_min, dx_max)
-        return yout.reshape((xout.size, ny)), get_last_info(odesys)
+        nreached = simple_predefined[PyOdeSys](odesys, atol, rtol, styp_from_name(method.lower().encode('UTF-8')), &y0[0],
+                                               xout.size, &xout[0], <double *>yout.data, nsteps,
+                                               dx0, dx_min, dx_max, autorestart, return_on_error)
+        info = get_last_info(odesys, success=False if return_on_error and nreached < xout.size else True)
+        info['nreached'] = nreached
+        return yout.reshape((xout.size, ny)), info
     finally:
         del odesys

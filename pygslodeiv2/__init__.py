@@ -56,12 +56,12 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         perform signature sanity checks on ``rhs`` and ``jac``
     check_indexing : bool (default: False)
         perform item setting sanity checks on ``rhs`` and ``jac``.
-    cb_kwargs: dict
-        Extra keyword arguments passed to ``rhs`` and ``jac``.
     autorestart : int
         Autorestarts on error (requires autonomous system).
     return_on_error : bool
         Instead of raising an exception return silently (see info['success']).
+    cb_kwargs: dict
+        Extra keyword arguments passed to ``rhs`` and ``jac``.
 
     Returns
     -------
@@ -88,7 +88,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
 def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
                          dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                          check_callable=False, check_indexing=False,
-                         cb_kwargs=None):
+                         autorestart=0, return_on_error=False, cb_kwargs=None):
     """ Integrates a system of ordinary differential equations (user chosen output).
 
     Parameters
@@ -121,6 +121,10 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
         perform signature sanity checks on ``rhs`` and ``jac``
     check_indexing : bool (default: False)
         perform item setting sanity checks on ``rhs`` and ``jac``.
+    autorestart : int
+        Autorestarts on error (requires autonomous system).
+    return_on_error : bool
+        Instead of raising an exception return silently (see info['success'] & info['nreached']).
     cb_kwargs : dict
         Extra keyword arguments passed to ``rhs`` and ``jac``.
 
@@ -143,4 +147,5 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
     return predefined(rhs, jac,
                       np.ascontiguousarray(y0, dtype=np.float64),
                       np.ascontiguousarray(xout, dtype=np.float64), atol, rtol,
-                      method, nsteps, dx0, dx_min, dx_max, cb_kwargs)
+                      method, nsteps, dx0, dx_min, dx_max,
+                      autorestart, return_on_error, cb_kwargs)

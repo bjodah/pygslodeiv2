@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -369,41 +370,68 @@ namespace gsl_odeiv2_cxx {
             return std::pair<std::vector<double>, std::vector<double>>(xout, yout);
         }
 
-        void predefined(std::size_t nt,
-                        const double * const tout,
-                        const double * const y0,
-                        double * const yout){
+        int predefined(std::size_t nt,
+                       const double * const tout,
+                       const double * const y0,
+                       double * const yout,
+                       int autorestart=0,
+                       bool return_on_error=false){
             ErrorHandler errh;  // has side-effects;
             double curr_t = tout[0];
+            bool error_ = false;
+            int idx;
+            std::string message;
             this->m_drv.reset();
             std::copy(y0, y0 + (this->ny), yout);
 
-            for (std::size_t idx=1; idx < nt; ++idx){
+            for (idx=1; idx < nt; ++idx){
                 std::copy(yout + (this->ny)*(idx-1),
                           yout + (this->ny)*idx,
                           yout + (this->ny)*idx);
                 int info = this->m_drv.apply(&curr_t, tout[idx], yout + idx*(this->ny));
                 if (info == GSL_SUCCESS){
-                    if (tout[idx] != curr_t)
-                        throw std::runtime_error("Did not reach requested time.");
+                    if (tout[idx] != curr_t){
+                        error_ = true;
+                        message = "Did not reach requested time.";
+                    }
                 } else if (info == GSL_EMAXITER){
-                    throw std::runtime_error(StreamFmt() << std::scientific
+                    error_ = true;
+                    message = StreamFmt() << std::scientific
                         << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
-                        << " (maximum number of iterations reached).");
+                        << " (maximum number of iterations reached).";
                 } else if (info == GSL_ENOPROG) {
-                    throw std::runtime_error(StreamFmt() << std::scientific
+                    error_ = true;
+                    message = StreamFmt() << std::scientific
                         << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
-                        << " (step size too small).");
+                        << " (step size too small).";
                 } else {
-                    throw std::runtime_error(StreamFmt() << std::scientific
+                    error_ = true;
+                    message = StreamFmt() << std::scientific
                         << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
-                        << " (unknown error code: "<< info <<")");
+                        << " (unknown error code: "<< info <<")";
+                }
+
+                if (error_){
+                    if (autorestart > 0) {
+                        int nreached = predefined(nt - idx + 1, tout + idx - 1,
+                                                  yout + (idx - 1)*this->ny,
+                                                  yout + (idx - 1)*this->ny,
+                                                  autorestart - 1, return_on_error);
+                        return idx + nreached;
+                    } else{
+                        if (return_on_error){
+                            std::cerr << message;
+                            return idx;
+                        } else {
+                            throw std::runtime_error(message);
+                        }
+                    }
                 }
             }
+            return idx;
         }
     };
-
 }

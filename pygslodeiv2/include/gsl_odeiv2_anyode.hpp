@@ -112,7 +112,7 @@ namespace gsl_odeiv2_anyode {
     }
 
     template <class OdeSys>
-    void simple_predefined(OdeSys * const odesys,
+    int simple_predefined(OdeSys * const odesys,
                            const double atol,
                            const double rtol,
                            const StepType styp,
@@ -123,7 +123,9 @@ namespace gsl_odeiv2_anyode {
                            long int mxsteps=0,
                            double dx0=0.0,
                            const double dx_min=0.0,
-                           const double dx_max=0.0
+                           const double dx_max=0.0,
+                           int autorestart=0,
+                           bool return_on_error=false
                            )
     {
         if (dx0 == 0.0){
@@ -134,18 +136,19 @@ namespace gsl_odeiv2_anyode {
         }
         if (mxsteps == 0)
             mxsteps = 500;
-        auto integr = get_integrator<OdeSys>(odesys, atol, rtol, styp, mxsteps, dx0, dx_min, dx_max);
+        auto integr = get_integrator<OdeSys>(odesys, atol, rtol, styp, dx0, dx_min, dx_max, mxsteps);
         odesys->integrator = static_cast<void*>(&integr);
         std::time_t cput0 = std::clock();
         auto t_start = std::chrono::high_resolution_clock::now();
 
-        integr.predefined(nout, xout, y0, yout);
+        int nreached = integr.predefined(nout, xout, y0, yout, autorestart, return_on_error);
 
         odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
         odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(
                 std::chrono::high_resolution_clock::now() - t_start).count();
         odesys->last_integration_info.clear();
         set_integration_info<OdeSys>(odesys, integr);
+        return nreached;
     }
 
 }
