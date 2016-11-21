@@ -220,7 +220,7 @@ def test_predefined_return_on_error():
     yref = decay_get_Cref(k, y0, xout - xout[0])
     assert np.allclose(yout[:info['nreached'], :], yref[:info['nreached'], :],
                        rtol=10*rtol, atol=10*atol)
-    assert 3 < info['nreached'] < 5  # not strict
+    assert 2 < info['nreached'] < 5  # not strict
     assert yout.shape[0] == xout.size
     assert info['nfev'] > 0
     assert info['njev'] > 0

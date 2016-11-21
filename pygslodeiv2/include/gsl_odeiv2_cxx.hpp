@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -379,59 +380,60 @@ namespace gsl_odeiv2_cxx {
             ErrorHandler errh;  // has side-effects;
             double curr_t = tout[0];
             bool error_ = false;
-            int idx;
+            size_t iout;
             std::string message;
             this->m_drv.reset();
             std::copy(y0, y0 + (this->ny), yout);
 
-            for (idx=1; idx < nt; ++idx){
-                std::copy(yout + (this->ny)*(idx-1),
-                          yout + (this->ny)*idx,
-                          yout + (this->ny)*idx);
-                int info = this->m_drv.apply(&curr_t, tout[idx], yout + idx*(this->ny));
+            for (iout=1; iout < nt; ++iout){
+                std::copy(yout + (this->ny)*(iout-1),
+                          yout + (this->ny)*iout,
+                          yout + (this->ny)*iout);
+                int info = this->m_drv.apply(&curr_t, tout[iout], yout + iout*(this->ny));
                 if (info == GSL_SUCCESS){
-                    if (tout[idx] != curr_t){
+                    if (tout[iout] != curr_t){
                         error_ = true;
                         message = "Did not reach requested time.";
                     }
                 } else if (info == GSL_EMAXITER){
                     error_ = true;
                     message = StreamFmt() << std::scientific
-                        << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
+                        << "gsl_odeiv2_driver_apply failed at t= " << tout[iout + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
                         << " (maximum number of iterations reached).";
                 } else if (info == GSL_ENOPROG) {
                     error_ = true;
                     message = StreamFmt() << std::scientific
-                        << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
+                        << "gsl_odeiv2_driver_apply failed at t= " << tout[iout + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
                         << " (step size too small).";
                 } else {
                     error_ = true;
                     message = StreamFmt() << std::scientific
-                        << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
+                        << "gsl_odeiv2_driver_apply failed at t= " << tout[iout + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
                         << " (unknown error code: "<< info <<")";
                 }
-
                 if (error_){
-                    if (autorestart > 0) {
-                        int nreached = predefined(nt - idx + 1, tout + idx - 1,
-                                                  yout + (idx - 1)*this->ny,
-                                                  yout + (idx - 1)*this->ny,
-                                                  autorestart - 1, return_on_error);
-                        return idx + nreached;
-                    } else{
-                        if (return_on_error){
-                            std::cerr << message;
-                            return idx;
+                    if (autorestart == 0){
+                        if (return_on_error) {
+                            iout--;
+                            break;
                         } else {
                             throw std::runtime_error(message);
                         }
+                    } else {
+                        std::array<double, 2> tout_ {{0, tout[iout] - tout[iout-1]}};
+                        std::vector<double> yout_(ny*2);
+                        int n_reached = this->predefined(2, tout_.data(), yout + (iout-1)*ny, yout_.data(),
+                                                         autorestart-1, return_on_error);
+                        if (n_reached == 0)
+                            break;
+                        std::memcpy(yout + ny*iout, yout_.data() + ny, ny);
                     }
                 }
             }
-            return idx;
+            return iout;
         }
     };
 }
