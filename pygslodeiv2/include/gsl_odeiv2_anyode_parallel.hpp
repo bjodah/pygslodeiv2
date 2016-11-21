@@ -20,10 +20,10 @@ namespace gsl_odeiv2_anyode_parallel {
                    const double * const y0,  // vectorized
                    const double * t0,  // vectorized
                    const double * tend,  // vectorized
-                   const long int mxsteps=0,
-                   const double dx0=0.0,
-                   const double dx_min=0.0,
-                   const double dx_max=0.0,
+                   const long int mxsteps,
+                   const double * dx0,  // vectorized
+                   const double * dx_min,  // vectorized
+                   const double * dx_max,  // vectorized
                    int autorestart=0,
                    bool return_on_error=false
                    ){
@@ -38,7 +38,7 @@ namespace gsl_odeiv2_anyode_parallel {
             te.run([&]{
                 local_result = simple_adaptive<OdeSys>(
                     odesys[idx], atol, rtol, styp, y0 + idx*ny, t0[idx], tend[idx],
-                    mxsteps, dx0, dx_min, dx_max, autorestart, return_on_error);
+                    mxsteps, dx0[idx], dx_min[idx], dx_max[idx], autorestart, return_on_error);
             });
             results[idx] = local_result;
         }
@@ -57,10 +57,12 @@ namespace gsl_odeiv2_anyode_parallel {
                      const std::size_t nout,
                      const double * const tout, // vectorized
                      double * const yout,  // vectorized
-                     const long int mxsteps=0,
-                     const double dx0=0.0,
-                     const double dx_min=0.0,
-                     const double dx_max=0.0
+                     const long int mxsteps,
+                     const double * dx0,  // vectorized
+                     const double * dx_min,  // vectorized
+                     const double * dx_max,
+                     int autorestart=0,
+                     bool return_on_error=false
                      ){
         const int ny = odesys[0]->get_ny();
         const int nsys = odesys.size();
@@ -71,7 +73,8 @@ namespace gsl_odeiv2_anyode_parallel {
             te.run([&]{
                 simple_predefined<OdeSys>(odesys[idx], atol, rtol, styp, y0 + idx*ny,
                                           nout, tout + idx*nout, yout + idx*ny*nout,
-                                          mxsteps, dx0, dx_min, dx_max);
+                                          mxsteps, dx0[idx], dx_min[idx], dx_max[idx],
+                                          autorestart, return_on_error);
             });
         }
         te.rethrow();
