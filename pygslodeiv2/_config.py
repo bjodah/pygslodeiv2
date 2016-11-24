@@ -1,3 +1,3 @@
 env = {
-    'BLAS': 'gslcblas'
+    'BLAS': 'gslcblas',
 }
