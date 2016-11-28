@@ -88,6 +88,8 @@ namespace gsl_odeiv2_anyode {
                     int autorestart=0,
                     bool return_on_error=false)
     {
+        if (dx0 == 0.0)
+            dx0 = odesys->get_dx0(x0, y0);
         if (dx0 == 0.0){
             if (x0 == 0)
                 dx0 = std::numeric_limits<double>::epsilon() * 100;
@@ -128,6 +130,8 @@ namespace gsl_odeiv2_anyode {
                            bool return_on_error=false
                            )
     {
+        if (dx0 == 0.0)
+            dx0 = odesys->get_dx0(xout[0], y0);
         if (dx0 == 0.0){
             if (xout[0] == 0)
                 dx0 = std::numeric_limits<double>::epsilon() * 1000;

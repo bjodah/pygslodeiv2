@@ -100,13 +100,11 @@ def test_integrate_predefined(method, forgiveness):
     if not use_jac:
         j = None
     xout = np.linspace(0, 3, 31)
-    dx0 = 1e-10
+    kwargs = dict(atol=1e-8, rtol=1e-8, dx0=1e-10, method=method)
     atol, rtol = 1e-8, 1e-8
     # Run twice to catch possible side-effects:
-    yout, info = integrate_predefined(f, j, y0, xout, dx0, atol,
-                                      rtol, method=method)
-    yout, info = integrate_predefined(f, j, y0, xout, dx0, atol,
-                                      rtol, method=method)
+    yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
+    yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
     yref = decay_get_Cref(k, y0, xout)
     print(yout)
     print(yref)

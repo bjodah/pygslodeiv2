@@ -28,7 +28,7 @@ cdef dict get_last_info(PyOdeSys * odesys, success=True):
 
 def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, double xend, double atol,
              double rtol, str method='bsimp', long int nsteps=500, double dx0=0.0, double dx_min=0.0,
-             double dx_max=0.0, int autorestart=0, bool return_on_error=False, cb_kwargs=None):
+             double dx_max=0.0, int autorestart=0, bool return_on_error=False, cb_kwargs=None, dx0cb=None):
     cdef:
         int ny = y0.shape[y0.ndim - 1]
         PyOdeSys * odesys
@@ -39,7 +39,7 @@ def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, doubl
         raise ValueError("NaN found in y0")
 
     odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL,
-                          <PyObject *>cb_kwargs, -1, -1, 0)
+                          <PyObject *>cb_kwargs, -1, -1, 0, <PyObject *>dx0cb)
     try:
         xout, yout = map(np.asarray, simple_adaptive[PyOdeSys](
             odesys, atol, rtol, styp_from_name(method.lower().encode('UTF-8')),
@@ -55,7 +55,7 @@ def predefined(rhs, jac,
                cnp.ndarray[cnp.float64_t, ndim=1] xout,
                double atol, double rtol, str method='bsimp', int nsteps=500, double dx0=0.0,
                double dx_min=0.0, double dx_max=0.0, int autorestart=0,
-               bool return_on_error=False, cb_kwargs=None):
+               bool return_on_error=False, cb_kwargs=None, dx0cb=None):
     cdef:
         int ny = y0.shape[y0.ndim - 1]
         cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((xout.size, ny))
@@ -66,7 +66,7 @@ def predefined(rhs, jac,
         raise ValueError("Method requires explicit jacobian callback")
     if np.isnan(y0).any():
         raise ValueError("NaN found in y0")
-    odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL, <PyObject *>cb_kwargs, -1, -1, 0)
+    odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL, <PyObject *>cb_kwargs, -1, -1, 0, <PyObject *>dx0cb)
     try:
         nreached = simple_predefined[PyOdeSys](odesys, atol, rtol, styp_from_name(method.lower().encode('UTF-8')), &y0[0],
                                                xout.size, &xout[0], <double *>yout.data, nsteps,
