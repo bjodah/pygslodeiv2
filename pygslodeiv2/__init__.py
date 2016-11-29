@@ -61,7 +61,7 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
     return_on_error : bool
         Instead of raising an exception return silently (see info['success']).
     cb_kwargs: dict
-        Extra keyword arguments passed to ``rhs`` and ``jac``.
+        Extra keyword arguments passed to ``rhs``, ``jac`` and possibly ``dx0cb``.
     dx0cb : callable
         Callback for calculating dx0 (make sure to pass dx0==0.0) to enable.
         Signature: ``f(x, y[:]) -> float``.
