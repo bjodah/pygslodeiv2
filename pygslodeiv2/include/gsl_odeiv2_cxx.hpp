@@ -299,10 +299,10 @@ namespace gsl_odeiv2_cxx {
         int get_n_failed_steps() const {
             return this->m_evo.m_evolve->failed_steps;
         }
-        void unsuccessful_step_throw_(int flag, double current_time, double last_step){
-            throw std::runtime_error(StreamFmt() << std::scientific << "Unsuccessful step (t="
-                                     << current_time << ", h=" << last_step << "): " <<
-                                     get_gslerror_string(flag));
+        std::string unsuccessful_msg_(int flag, double current_time, double last_step){
+            return StreamFmt() << std::scientific << "[GSL ERROR] Unsuccessful step (t="
+                               << current_time << ", h=" << last_step << "): " <<
+                get_gslerror_string(flag);
         }
         std::pair<std::vector<double>, std::vector<double> >
         adaptive(const double x0,
@@ -324,11 +324,14 @@ namespace gsl_odeiv2_cxx {
             while (curr_x < xend){
                 idx++;
                 if (idx > mxsteps){
-                    if (return_on_error)
+                    std::string msg = StreamFmt() << std::scientific << "[GSL ERROR] Maximum number of steps reached (at t="
+                                                  << curr_x << "): " << mxsteps << '\n';
+                    if (return_on_error){
+                        std::cerr << msg << '\n';
                         break;
-                    else
-                        throw std::runtime_error(StreamFmt() << std::scientific << "Maximum number of steps reached (at t="
-                                                 << curr_x <<"): " << mxsteps);
+                    }else{
+                        throw std::runtime_error(msg);
+                    }
                 }
                 if (curr_dx > this->m_drv.m_driver->hmax){
                     curr_dx = this->m_drv.m_driver->hmax;
@@ -338,6 +341,7 @@ namespace gsl_odeiv2_cxx {
                 yout.insert(yout.end(), yout.end() - ny, yout.end());
                 int info = this->m_evo.apply(this->m_ctrl, this->m_stp, &(this->m_sys),
                                              &curr_x, xend, &curr_dx, &(*(yout.end() - ny)));
+                xout.push_back(curr_x);
                 if (info == GSL_SUCCESS) {
                     ;
                 } else if (autorestart) {
@@ -345,27 +349,32 @@ namespace gsl_odeiv2_cxx {
                     this->m_evo.reset();
                     this->m_drv.set_max_num_steps(mxsteps - idx);
                     const double last_x = xout.back();
-                    xout.pop_back();
                     auto inner = this->adaptive(0, xend - last_x, &yout[idx-1], autorestart-1, return_on_error);
+                    xout.pop_back();
                     for (const auto& v : inner.first)
                         xout.push_back(v + last_x);
                     yout.insert(yout.end(), inner.second.begin() + ny, inner.second.end());
                     this->m_drv.set_max_num_steps(mxsteps);
                     break;
                 } else {
+                    std::string msg;
+                    if (info == GSL_FAILURE)
+                        msg = StreamFmt() << std::scientific
+                                          << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
+                                          << " with stepsize=" << curr_dx << " (step size too small).\n";
+                    else
+                        msg = unsuccessful_msg_(info, curr_x, curr_dx);
+
                     if (return_on_error) {
+                        xout.pop_back();
                         for (int idx=0; idx<ny; ++idx)
                             yout.pop_back();
+                        std::cerr << msg;
                         break;
-                    } else if (info == GSL_FAILURE) {
-                        throw std::runtime_error(StreamFmt() << std::scientific
-                                                 << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
-                                                 << " with stepsize=" << curr_dx << " (step size too small).");
                     } else {
-                        unsuccessful_step_throw_(info, curr_x, curr_dx);
+                        throw std::runtime_error(msg);
                     }
                 }
-                xout.push_back(curr_x);
             }
         done:
             return std::pair<std::vector<double>, std::vector<double>>(xout, yout);
