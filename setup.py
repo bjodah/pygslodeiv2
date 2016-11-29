@@ -55,7 +55,8 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
     ext_modules[0].include_dirs = [
         np.get_include(), package_include,
         os.path.join('external', 'anyode', 'include')]
-    ext_modules[0].libraries += ['gsl', env['BLAS'], 'm']
+    ext_modules[0].libraries.extend(env['GSL_LIBS'].split(','))
+    ext_modules[0].libraries.extend(env['BLAS'].split(','))
 
 _version_env_var = '%s_RELEASE_VERSION' % pkg_name.upper()
 RELEASE_VERSION = os.environ.get(_version_env_var, '')
