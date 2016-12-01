@@ -1,3 +1,8 @@
+v0.7.0
+======
+- dx0cb
+- pygslodeiv2._config
+
 v0.6.1
 ======
 - adaptive learned two new arguments: ``autorestart`` & ``return_on_error``.
