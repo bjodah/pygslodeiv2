@@ -5,8 +5,10 @@
 
 import io
 import os
+import re
 import pprint
 import shutil
+import subprocess
 import sys
 import warnings
 
@@ -53,7 +55,8 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
     ext_modules[0].include_dirs = [
         np.get_include(), package_include,
         os.path.join('external', 'anyode', 'include')]
-    ext_modules[0].libraries += ['gsl', env['BLAS'], 'm']
+    ext_modules[0].libraries.extend(env['GSL_LIBS'].split(','))
+    ext_modules[0].libraries.extend(env['BLAS'].split(','))
 
 _version_env_var = '%s_RELEASE_VERSION' % pkg_name.upper()
 RELEASE_VERSION = os.environ.get(_version_env_var, '')
@@ -75,6 +78,16 @@ if len(RELEASE_VERSION) > 1:
 else:  # set `__version__` from _release.py:
     TAGGED_RELEASE = False
     exec(open(release_py_path).read())
+    if __version__.endswith('git'):
+        try:
+            _git_version = subprocess.check_output(
+                ['git', 'describe', '--dirty']).rstrip().decode('utf-8').replace('-dirty', '.dirty')
+        except subprocess.CalledProcessError:
+            warnings.warn("A git-archive is being installed - version information incomplete.")
+        else:
+            if 'develop' not in sys.argv:
+                warnings.warn("Using git to derive version: dev-branches may compete.")
+                __version__ = re.sub('v([0-9.]+)-(\d+)-(\w+)', r'\1.post\2+\3', _git_version)  # .dev < '' < .post
 
 classifiers = [
     "Development Status :: 4 - Beta",

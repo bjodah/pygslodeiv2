@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdio>
+#include <cstring>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -297,10 +299,10 @@ namespace gsl_odeiv2_cxx {
         int get_n_failed_steps() const {
             return this->m_evo.m_evolve->failed_steps;
         }
-        void unsuccessful_step_throw_(int flag, double current_time, double last_step){
-            throw std::runtime_error(StreamFmt() << std::scientific << "Unsuccessful step (t="
-                                     << current_time << ", h=" << last_step << "): " <<
-                                     get_gslerror_string(flag));
+        std::string unsuccessful_msg_(int flag, double current_time, double last_step){
+            return StreamFmt() << std::scientific << "[GSL ERROR] Unsuccessful step (t="
+                               << current_time << ", h=" << last_step << "): " <<
+                get_gslerror_string(flag);
         }
         std::pair<std::vector<double>, std::vector<double> >
         adaptive(const double x0,
@@ -322,11 +324,14 @@ namespace gsl_odeiv2_cxx {
             while (curr_x < xend){
                 idx++;
                 if (idx > mxsteps){
-                    if (return_on_error)
+                    std::string msg = StreamFmt() << std::scientific << "[GSL ERROR] Maximum number of steps reached (at t="
+                                                  << curr_x << "): " << mxsteps << '\n';
+                    if (return_on_error){
+                        std::cerr << msg << '\n';
                         break;
-                    else
-                        throw std::runtime_error(StreamFmt() << std::scientific << "Maximum number of steps reached (at t="
-                                                 << curr_x <<"): " << mxsteps);
+                    }else{
+                        throw std::runtime_error(msg);
+                    }
                 }
                 if (curr_dx > this->m_drv.m_driver->hmax){
                     curr_dx = this->m_drv.m_driver->hmax;
@@ -336,6 +341,7 @@ namespace gsl_odeiv2_cxx {
                 yout.insert(yout.end(), yout.end() - ny, yout.end());
                 int info = this->m_evo.apply(this->m_ctrl, this->m_stp, &(this->m_sys),
                                              &curr_x, xend, &curr_dx, &(*(yout.end() - ny)));
+                xout.push_back(curr_x);
                 if (info == GSL_SUCCESS) {
                     ;
                 } else if (autorestart) {
@@ -343,67 +349,100 @@ namespace gsl_odeiv2_cxx {
                     this->m_evo.reset();
                     this->m_drv.set_max_num_steps(mxsteps - idx);
                     const double last_x = xout.back();
-                    xout.pop_back();
                     auto inner = this->adaptive(0, xend - last_x, &yout[idx-1], autorestart-1, return_on_error);
+                    xout.pop_back();
                     for (const auto& v : inner.first)
                         xout.push_back(v + last_x);
                     yout.insert(yout.end(), inner.second.begin() + ny, inner.second.end());
                     this->m_drv.set_max_num_steps(mxsteps);
                     break;
                 } else {
+                    std::string msg;
+                    if (info == GSL_FAILURE)
+                        msg = StreamFmt() << std::scientific
+                                          << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
+                                          << " with stepsize=" << curr_dx << " (step size too small).\n";
+                    else
+                        msg = unsuccessful_msg_(info, curr_x, curr_dx);
+
                     if (return_on_error) {
+                        xout.pop_back();
                         for (int idx=0; idx<ny; ++idx)
                             yout.pop_back();
+                        std::cerr << msg;
                         break;
-                    } else if (info == GSL_FAILURE) {
-                        throw std::runtime_error(StreamFmt() << std::scientific
-                                                 << "gsl_odeiv2_evolve_apply failed at t= " << curr_x
-                                                 << " with stepsize=" << curr_dx << " (step size too small).");
                     } else {
-                        unsuccessful_step_throw_(info, curr_x, curr_dx);
+                        throw std::runtime_error(msg);
                     }
                 }
-                xout.push_back(curr_x);
             }
         done:
             return std::pair<std::vector<double>, std::vector<double>>(xout, yout);
         }
 
-        void predefined(std::size_t nt,
-                        const double * const tout,
-                        const double * const y0,
-                        double * const yout){
+        int predefined(std::size_t nt,
+                       const double * const tout,
+                       const double * const y0,
+                       double * const yout,
+                       int autorestart=0,
+                       bool return_on_error=false){
             ErrorHandler errh;  // has side-effects;
             double curr_t = tout[0];
+            bool error_ = false;
+            size_t iout;
+            std::string message;
             this->m_drv.reset();
             std::copy(y0, y0 + (this->ny), yout);
 
-            for (std::size_t idx=1; idx < nt; ++idx){
-                std::copy(yout + (this->ny)*(idx-1),
-                          yout + (this->ny)*idx,
-                          yout + (this->ny)*idx);
-                int info = this->m_drv.apply(&curr_t, tout[idx], yout + idx*(this->ny));
+            for (iout=1; iout < nt; ++iout){
+                std::copy(yout + (this->ny)*(iout-1),
+                          yout + (this->ny)*iout,
+                          yout + (this->ny)*iout);
+                int info = this->m_drv.apply(&curr_t, tout[iout], yout + iout*(this->ny));
                 if (info == GSL_SUCCESS){
-                    if (tout[idx] != curr_t)
-                        throw std::runtime_error("Did not reach requested time.");
+                    if (tout[iout] != curr_t){
+                        error_ = true;
+                        message = "Did not reach requested time.";
+                    }
                 } else if (info == GSL_EMAXITER){
-                    throw std::runtime_error(StreamFmt() << std::scientific
-                        << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
+                    error_ = true;
+                    message = StreamFmt() << std::scientific
+                        << "gsl_odeiv2_driver_apply failed at t= " << tout[iout + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
-                        << " (maximum number of iterations reached).");
+                        << " (maximum number of iterations reached).";
                 } else if (info == GSL_ENOPROG) {
-                    throw std::runtime_error(StreamFmt() << std::scientific
-                        << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
+                    error_ = true;
+                    message = StreamFmt() << std::scientific
+                        << "gsl_odeiv2_driver_apply failed at t= " << tout[iout + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
-                        << " (step size too small).");
+                        << " (step size too small).";
                 } else {
-                    throw std::runtime_error(StreamFmt() << std::scientific
-                        << "gsl_odeiv2_driver_apply failed at t= " << tout[idx + 1]
+                    error_ = true;
+                    message = StreamFmt() << std::scientific
+                        << "gsl_odeiv2_driver_apply failed at t= " << tout[iout + 1]
                         << " with stepsize=" << this->m_drv.m_driver->e->last_step
-                        << " (unknown error code: "<< info <<")");
+                        << " (unknown error code: "<< info <<")";
+                }
+                if (error_){
+                    if (autorestart == 0){
+                        if (return_on_error) {
+                            iout--;
+                            break;
+                        } else {
+                            throw std::runtime_error(message);
+                        }
+                    } else {
+                        std::array<double, 2> tout_ {{0, tout[iout] - tout[iout-1]}};
+                        std::vector<double> yout_(ny*2);
+                        int n_reached = this->predefined(2, tout_.data(), yout + (iout-1)*ny, yout_.data(),
+                                                         autorestart-1, return_on_error);
+                        if (n_reached == 0)
+                            break;
+                        std::memcpy(yout + ny*iout, yout_.data() + ny, ny);
+                    }
                 }
             }
+            return iout;
         }
     };
-
 }

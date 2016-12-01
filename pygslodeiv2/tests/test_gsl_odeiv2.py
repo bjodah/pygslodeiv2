@@ -100,13 +100,11 @@ def test_integrate_predefined(method, forgiveness):
     if not use_jac:
         j = None
     xout = np.linspace(0, 3, 31)
-    dx0 = 1e-10
+    kwargs = dict(atol=1e-8, rtol=1e-8, dx0=1e-10, method=method)
     atol, rtol = 1e-8, 1e-8
     # Run twice to catch possible side-effects:
-    yout, info = integrate_predefined(f, j, y0, xout, dx0, atol,
-                                      rtol, method=method)
-    yout, info = integrate_predefined(f, j, y0, xout, dx0, atol,
-                                      rtol, method=method)
+    yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
+    yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
     yref = decay_get_Cref(k, y0, xout)
     print(yout)
     print(yref)
@@ -183,3 +181,60 @@ def test_adaptive_return_on_error():
     assert info['njev'] > 0
     assert info['success'] is False
     assert xout[-1] < kwargs['xend']  # obviously not strict
+
+
+def test_predefined_autorestart():
+    k = k0, k1, k2 = 2.0, 3.0, 4.0
+    y0 = [0.7, 0.3, 0.5]
+    atol, rtol = 1e-8, 1e-8
+    x0, xend = 0, 3
+    kwargs = dict(dx0=1e-10, atol=atol, rtol=rtol,
+                  method='bsimp', nsteps=62,
+                  autorestart=10)
+    f, j = _get_f_j(k)
+    xout = np.linspace(x0, xend)
+    yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
+    yref = decay_get_Cref(k, y0, xout)
+    assert np.allclose(yout, yref,
+                       rtol=10*rtol,
+                       atol=10*atol)
+    assert xout[-1] > 1e-6
+    assert yout.shape[0] == xout.size
+    assert info['nfev'] > 0
+    assert info['njev'] > 0
+    assert info['success']
+    assert xout[-1] == xend
+
+
+def test_predefined_return_on_error():
+    k = k0, k1, k2 = 2.0, 300.0, 4.0
+    y0 = [0.7, 0.0, 0.2]
+    atol, rtol = 1e-12, 1e-12
+    kwargs = dict(dx0=1e-11, atol=atol, rtol=rtol, method='bsimp',
+                  return_on_error=True, nsteps=10)
+    f, j = _get_f_j(k)
+    xout = np.logspace(-10, 1, 5)
+    yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
+    yref = decay_get_Cref(k, y0, xout - xout[0])
+    assert np.allclose(yout[:info['nreached'], :], yref[:info['nreached'], :],
+                       rtol=10*rtol, atol=10*atol)
+    assert 2 < info['nreached'] < 5  # not strict
+    assert yout.shape[0] == xout.size
+    assert info['nfev'] > 0
+    assert info['njev'] > 0
+    assert info['success'] is False
+
+
+def test_dx0cb():
+    k = 1e23, 3.0, 4.0
+    y0 = [.7, .0, .0]
+    x0, xend = 0, 5
+    kwargs = dict(atol=1e-8, rtol=1e-8, method='bsimp', dx0cb=lambda x, y: y[0]*1e-30)
+    f, j = _get_f_j(k)
+    xout, yout, info = integrate_adaptive(f, j, y0, x0, xend, **kwargs)
+    yref = decay_get_Cref(k, y0, xout)
+    assert np.allclose(yout, yref, atol=40*kwargs['atol'], rtol=40*kwargs['rtol'])
+    assert info['nfev'] > 0
+    assert info['njev'] > 0
+    assert info['success'] is True
+    assert xout[-1] == xend

@@ -16,9 +16,9 @@ cdef extern from "gsl_odeiv2_anyode_parallel.hpp" namespace "gsl_odeiv2_anyode_p
         const double *,
         const double *,
         long int,
-        double,
-        double,
-        double,
+        double *,
+        double *,
+        double *,
         int,
         bool
     ) nogil except +
@@ -33,7 +33,9 @@ cdef extern from "gsl_odeiv2_anyode_parallel.hpp" namespace "gsl_odeiv2_anyode_p
         const double * const,
         double * const,
         long int,
-        double,
-        double,
-        double,
+        double *,
+        double *,
+        double *,
+        int,
+        bool
     ) nogil except +

@@ -18,10 +18,10 @@ def get_include():
                              '%s/include' % __name__)
 
 
-def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
+def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
                        dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                        check_callable=False, check_indexing=False,
-                       autorestart=0, return_on_error=False, cb_kwargs=None):
+                       autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None):
     """ Integrates a system of ordinary differential equations (solver chosen output).
 
     Parameters
@@ -37,12 +37,12 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         initial value of the independent variable
     xend : float
         stopping value for the independent variable
-    dx0 : float
-        initial step-size
     atol : float
         absolute tolerance
     rtol : float
         relative tolerance
+    dx0 : float
+        initial step-size
     dx_min : float
         minimum step (default: 0.0)
     dx_max : float
@@ -56,12 +56,15 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
         perform signature sanity checks on ``rhs`` and ``jac``
     check_indexing : bool (default: False)
         perform item setting sanity checks on ``rhs`` and ``jac``.
-    cb_kwargs: dict
-        Extra keyword arguments passed to ``rhs`` and ``jac``.
     autorestart : int
         Autorestarts on error (requires autonomous system).
     return_on_error : bool
         Instead of raising an exception return silently (see info['success']).
+    cb_kwargs: dict
+        Extra keyword arguments passed to ``rhs``, ``jac`` and possibly ``dx0cb``.
+    dx0cb : callable
+        Callback for calculating dx0 (make sure to pass dx0==0.0) to enable.
+        Signature: ``f(x, y[:]) -> float``.
 
     Returns
     -------
@@ -82,13 +85,13 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, dx0, atol, rtol,
 
     return adaptive(rhs, jac, np.ascontiguousarray(y0, dtype=np.float64), x0,
                     xend, atol, rtol, method, nsteps, dx0, dx_min, dx_max,
-                    autorestart, return_on_error, cb_kwargs)
+                    autorestart, return_on_error, cb_kwargs, dx0cb)
 
 
-def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
+def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
                          dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                          check_callable=False, check_indexing=False,
-                         cb_kwargs=None):
+                         autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None):
     """ Integrates a system of ordinary differential equations (user chosen output).
 
     Parameters
@@ -102,12 +105,12 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
         initial values of the dependent variables
     xout : array_like
         values of the independent variable
-    dx0 : float
-        initial step-size
     atol : float
         absolute tolerance
     rtol : float
         relative tolerance
+    dx0 : float
+        initial step-size
     dx_min : float
         minimum step (default: 0.0)
     dx_max : float
@@ -121,8 +124,15 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
         perform signature sanity checks on ``rhs`` and ``jac``
     check_indexing : bool (default: False)
         perform item setting sanity checks on ``rhs`` and ``jac``.
+    autorestart : int
+        Autorestarts on error (requires autonomous system).
+    return_on_error : bool
+        Instead of raising an exception return silently (see info['success'] & info['nreached']).
     cb_kwargs : dict
         Extra keyword arguments passed to ``rhs`` and ``jac``.
+    dx0cb : callable
+        Callback for calculating dx0 (make sure to pass dx0==0.0) to enable.
+        Signature: ``f(x, y[:]) -> float``.
 
     Returns
     -------
@@ -143,4 +153,5 @@ def integrate_predefined(rhs, jac, y0, xout, dx0, atol, rtol,
     return predefined(rhs, jac,
                       np.ascontiguousarray(y0, dtype=np.float64),
                       np.ascontiguousarray(xout, dtype=np.float64), atol, rtol,
-                      method, nsteps, dx0, dx_min, dx_max, cb_kwargs)
+                      method, nsteps, dx0, dx_min, dx_max,
+                      autorestart, return_on_error, cb_kwargs, dx0cb)
