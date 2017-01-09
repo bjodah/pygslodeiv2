@@ -3,7 +3,7 @@ LIBS ?=-lgsl -lgslcblas -lm
 CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -pedantic -g -ggdb -O0
 #-D_GLIBCXX_DEBUG
 CXXFLAGS += $(EXTRA_FLAGS)
-INCLUDE ?= -I../include -I../external/anyode/include
+INCLUDE ?= -I../pygslodeiv2/include -I../external/anyode/include
 DEFINES ?=
 OPENMP_FLAG ?= -fopenmp
 OPENMP_LIB ?= -lgomp
@@ -22,10 +22,10 @@ clean:
 	rm catch.hpp
 	rm test_gsl_odeiv2_cxx
 
-test_%: test_%.cpp ../include/gsl_odeiv2_cxx.hpp catch.hpp testing_utils.hpp
+test_%: test_%.cpp ../pygslodeiv2/include/gsl_odeiv2_cxx.hpp catch.hpp testing_utils.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) $(DEFINES) -o $@ $< $(LIBS)
 
-test_gsl_odeiv2_anyode_parallel: test_gsl_odeiv2_anyode_parallel.cpp ../include/gsl_odeiv2_*.hpp
+test_gsl_odeiv2_anyode_parallel: test_gsl_odeiv2_anyode_parallel.cpp ../pygslodeiv2/include/gsl_odeiv2_*.hpp
 	$(CXX) $(CXXFLAGS) $(OPENMP_FLAG) $(INCLUDE) $(DEFINES) -o $@ $< $(LIBS) $(OPENMP_LIB)
 
 catch.hpp: catch.hpp.bz2
