@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -38,6 +39,10 @@ namespace {
 
 
 namespace gsl_odeiv2_cxx {
+
+    using get_dx_max_fn = std::function<
+            double(double, const double * const)>;
+
     std::string get_gslerror_string(int flag){
         switch(flag){  // from gsl_errno.h
         case GSL_SUCCESS:
@@ -294,9 +299,11 @@ namespace gsl_odeiv2_cxx {
         }
 
         int get_n_steps() const {
+            // return this->m_drv.m_driver->e->count;
             return this->m_evo.m_evolve->count;
         }
         int get_n_failed_steps() const {
+            // return this->m_drv.m_driver->e->failed_steps;
             return this->m_evo.m_evolve->failed_steps;
         }
         std::string unsuccessful_msg_(int flag, double current_time, double last_step){
@@ -309,7 +316,9 @@ namespace gsl_odeiv2_cxx {
                  const double xend,
                  const double * const y0,
                  int autorestart=0,
-                 bool return_on_error=false){
+                 bool return_on_error=false,
+                 get_dx_max_fn get_dx_max = get_dx_max_fn()
+		){
             ErrorHandler errh;  // has side-effects;
             unsigned idx = 0;
             const unsigned long int mxsteps = this->m_drv.get_max_num_steps();
@@ -339,6 +348,8 @@ namespace gsl_odeiv2_cxx {
                     curr_dx = this->m_drv.m_driver->hmin;
                 }
                 yout.insert(yout.end(), yout.end() - ny, yout.end());
+                if (get_dx_max)
+		    this->m_drv.set_max_step(get_dx_max(curr_x, &(*(yout.end() - ny))));
                 int info = this->m_evo.apply(this->m_ctrl, this->m_stp, &(this->m_sys),
                                              &curr_x, xend, &curr_dx, &(*(yout.end() - ny)));
                 xout.push_back(curr_x);
@@ -385,7 +396,9 @@ namespace gsl_odeiv2_cxx {
                        const double * const y0,
                        double * const yout,
                        int autorestart=0,
-                       bool return_on_error=false){
+                       bool return_on_error=false,
+                       get_dx_max_fn get_dx_max = get_dx_max_fn()
+                       ){
             ErrorHandler errh;  // has side-effects;
             double curr_t = tout[0];
             bool error_ = false;
@@ -398,6 +411,8 @@ namespace gsl_odeiv2_cxx {
                 std::copy(yout + (this->ny)*(iout-1),
                           yout + (this->ny)*iout,
                           yout + (this->ny)*iout);
+                if (get_dx_max)
+		    this->m_drv.set_max_step(get_dx_max(tout[iout-1], yout + iout*(this->ny)));
                 int info = this->m_drv.apply(&curr_t, tout[iout], yout + iout*(this->ny));
                 if (info == GSL_SUCCESS){
                     if (tout[iout] != curr_t){

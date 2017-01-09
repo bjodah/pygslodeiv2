@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <functional>
 #include "anyode/anyode.hpp"
 #include "gsl_odeiv2_cxx.hpp"
 
@@ -103,7 +104,10 @@ namespace gsl_odeiv2_anyode {
         std::time_t cput0 = std::clock();
         auto t_start = std::chrono::high_resolution_clock::now();
 
-        auto result = integr.adaptive(x0, xend, y0, autorestart, return_on_error);
+        auto result = integr.adaptive(x0, xend, y0, autorestart, return_on_error,
+            ((odesys->use_get_dx_max) ? static_cast<gsl_odeiv2_cxx::get_dx_max_fn>(
+                std::bind(&OdeSys::get_dx_max, odesys, std::placeholders::_1 , std::placeholders::_2))
+	     : gsl_odeiv2_cxx::get_dx_max_fn()));
 
         odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
         odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(
@@ -145,7 +149,10 @@ namespace gsl_odeiv2_anyode {
         std::time_t cput0 = std::clock();
         auto t_start = std::chrono::high_resolution_clock::now();
 
-        int nreached = integr.predefined(nout, xout, y0, yout, autorestart, return_on_error);
+        int nreached = integr.predefined(nout, xout, y0, yout, autorestart, return_on_error,
+            ((odesys->use_get_dx_max) ? static_cast<gsl_odeiv2_cxx::get_dx_max_fn>(
+                std::bind(&OdeSys::get_dx_max, odesys, std::placeholders::_1 , std::placeholders::_2))
+	     : gsl_odeiv2_cxx::get_dx_max_fn()));
 
         odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
         odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(

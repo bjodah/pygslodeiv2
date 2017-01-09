@@ -21,5 +21,3 @@ PYTHONPATH=$(pwd) PYTHON=python3 ./scripts/run_tests.sh --cov $PKG_NAME --cov-re
 git archive -o /tmp/$PKG_NAME.zip HEAD
 python3 -m pip install --force-reinstall /tmp/$PKG_NAME.zip
 (cd /; python3 -c "from ${PKG_NAME} import get_include as gi; import os; assert 'gsl_odeiv2_cxx.pxd' in os.listdir(gi())")
-
-! grep "DO-NOT-MERGE!" -R . --exclude ci.sh

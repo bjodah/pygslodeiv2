@@ -21,7 +21,7 @@ def get_include():
 def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
                        dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                        check_callable=False, check_indexing=False,
-                       autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None):
+                       autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None, dx_max_cb=None):
     """ Integrates a system of ordinary differential equations (solver chosen output).
 
     Parameters
@@ -65,6 +65,9 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
     dx0cb : callable
         Callback for calculating dx0 (make sure to pass dx0==0.0) to enable.
         Signature: ``f(x, y[:]) -> float``.
+    dx_max_cb: callable
+        Callback for calculating dx_max. Signature: ``f(x, y[:]) -> float``.
+
 
     Returns
     -------
@@ -85,13 +88,13 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
 
     return adaptive(rhs, jac, np.ascontiguousarray(y0, dtype=np.float64), x0,
                     xend, atol, rtol, method, nsteps, dx0, dx_min, dx_max,
-                    autorestart, return_on_error, cb_kwargs, dx0cb)
+                    autorestart, return_on_error, cb_kwargs, dx0cb, dx_max_cb)
 
 
 def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
                          dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                          check_callable=False, check_indexing=False,
-                         autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None):
+                         autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None, dx_max_cb=None):
     """ Integrates a system of ordinary differential equations (user chosen output).
 
     Parameters
@@ -133,6 +136,8 @@ def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
     dx0cb : callable
         Callback for calculating dx0 (make sure to pass dx0==0.0) to enable.
         Signature: ``f(x, y[:]) -> float``.
+    dx_max_cb: callable
+        Callback for calculating dx_max. Signature: ``f(x, y[:]) -> float``.
 
     Returns
     -------
@@ -154,4 +159,4 @@ def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
                       np.ascontiguousarray(y0, dtype=np.float64),
                       np.ascontiguousarray(xout, dtype=np.float64), atol, rtol,
                       method, nsteps, dx0, dx_min, dx_max,
-                      autorestart, return_on_error, cb_kwargs, dx0cb)
+                      autorestart, return_on_error, cb_kwargs, dx0cb, dx_max_cb)
