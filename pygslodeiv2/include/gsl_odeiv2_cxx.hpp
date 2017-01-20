@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cfenv>
 #include <cstdio>
 #include <cstring>
 #include <functional>
@@ -12,6 +13,8 @@
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
+
+//pragma STDC FENV_ACCESS on  // GCC 5.4 does not seem to support the pragma
 
 namespace {
     class StreamFmt
@@ -42,6 +45,14 @@ namespace gsl_odeiv2_cxx {
 
     using get_dx_max_fn = std::function<
             double(double, const double * const)>;
+
+    static const std::unordered_map<std::string, int> fpes {{
+        {"FE_INEXACT", FE_INEXACT},
+        {"FE_UNDERFLOW", FE_UNDERFLOW},
+        {"FE_OVERFLOW", FE_OVERFLOW},
+        {"FE_INVALID", FE_INVALID},
+        {"FE_DIVBYZERO", FE_DIVBYZERO}
+    }};
 
     std::string get_gslerror_string(int flag){
         switch(flag){  // from gsl_errno.h
@@ -283,6 +294,10 @@ namespace gsl_odeiv2_cxx {
         Control m_ctrl;
         Evolve m_evo;
         int ny;
+
+        bool record_order = false, record_fpe = false;
+        std::vector<int> orders_seen, fpes_seen;
+
         GSLIntegrator(RhsFn rhs_cb, JacFn jac_cb, int ny, const StepType styp,
                       double dx0, double atol, double rtol, void * user_data, int mxsteps=500) :
             m_sys(gsl_odeiv2_system({rhs_cb, jac_cb, static_cast<std::size_t>(ny), user_data})),
@@ -306,6 +321,9 @@ namespace gsl_odeiv2_cxx {
             // return this->m_drv.m_driver->e->failed_steps;
             return this->m_evo.m_evolve->failed_steps;
         }
+        int get_current_order() {
+            return gsl_odeiv2_step_order(m_stp.m_step);
+        }
         std::string unsuccessful_msg_(int flag, double current_time, double last_step){
             return StreamFmt() << std::scientific << "[GSL ERROR] Unsuccessful step (t="
                                << current_time << ", h=" << last_step << "): " <<
@@ -327,6 +345,12 @@ namespace gsl_odeiv2_cxx {
             double curr_x = x0;
             double curr_dx = this->m_drv.m_driver->h;
             xout.push_back(curr_x);
+            if (record_order)
+                orders_seen.push_back(get_current_order()); // len(orders_seen) == len(xout)
+            if (record_fpe){
+                std::feclearexcept(FE_ALL_EXCEPT);
+                fpes_seen.push_back(std::fetestexcept(FE_ALL_EXCEPT));
+            }
             yout.insert(yout.end(), y0, y0 + ny);
             if (curr_x == xend)
                 goto done;
@@ -353,6 +377,12 @@ namespace gsl_odeiv2_cxx {
                 int info = this->m_evo.apply(this->m_ctrl, this->m_stp, &(this->m_sys),
                                              &curr_x, xend, &curr_dx, &(*(yout.end() - ny)));
                 xout.push_back(curr_x);
+                if (record_order)
+                    orders_seen.push_back(get_current_order());
+                if (record_fpe){
+                    fpes_seen.push_back(std::fetestexcept(FE_ALL_EXCEPT));
+                    std::feclearexcept(FE_ALL_EXCEPT);
+                }
                 if (info == GSL_SUCCESS) {
                     ;
                 } else if (autorestart) {
@@ -406,7 +436,12 @@ namespace gsl_odeiv2_cxx {
             std::string message;
             this->m_drv.reset();
             std::copy(y0, y0 + (this->ny), yout);
-
+            if (record_order)
+                orders_seen.push_back(get_current_order());
+            if (record_fpe){
+                std::feclearexcept(FE_ALL_EXCEPT);
+                fpes_seen.push_back(std::fetestexcept(FE_ALL_EXCEPT));
+            }
             for (iout=1; iout < nt; ++iout){
                 std::copy(yout + (this->ny)*(iout-1),
                           yout + (this->ny)*iout,
@@ -418,6 +453,12 @@ namespace gsl_odeiv2_cxx {
                     if (tout[iout] != curr_t){
                         error_ = true;
                         message = "Did not reach requested time.";
+                    }
+                    if (record_order)
+                        orders_seen.push_back(get_current_order());
+                    if (record_fpe){
+                        fpes_seen.push_back(std::fetestexcept(FE_ALL_EXCEPT));
+                        std::feclearexcept(FE_ALL_EXCEPT);
                     }
                 } else if (info == GSL_EMAXITER){
                     error_ = true;
