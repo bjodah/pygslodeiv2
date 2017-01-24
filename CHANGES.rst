@@ -1,3 +1,7 @@
+v0.7.2
+======
+- support for record_rhs_xvals/record_jac_xvals/record_order/record_fpe
+
 v0.7.1
 ======
 - get_dx_max_cb (callback to calculate dx_max)
