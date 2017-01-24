@@ -7,7 +7,7 @@ from __future__ import division, absolute_import
 
 import numpy as np
 
-from ._gsl_odeiv2 import adaptive, predefined, requires_jac, steppers
+from ._gsl_odeiv2 import adaptive, predefined, requires_jac, steppers, fpes
 from ._util import _check_callable, _check_indexing, _ensure_5args
 from ._release import __version__
 
@@ -21,7 +21,7 @@ def get_include():
 def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
                        dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                        check_callable=False, check_indexing=False,
-                       autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None, dx_max_cb=None):
+                       autorestart=0, return_on_error=False, cb_kwargs=None, **kwargs):
     """ Integrates a system of ordinary differential equations (solver chosen output).
 
     Parameters
@@ -60,6 +60,14 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
         Autorestarts on error (requires autonomous system).
     return_on_error : bool
         Instead of raising an exception return silently (see info['success']).
+    record_rhs_xvals : bool
+        When True: will return x values for rhs calls in ``info['rhs_xvals']``.
+    record_jac_xvals : bool
+        When True will return x values for jac calls in ``info['jac_xvals']``.
+    record_order : bool
+        When True will return used time stepper order in ``info['orders']``.
+    record_fpe : bool
+        When True will return observed floating point errors in ``info['fpes']``. (see ``fpes``)
     cb_kwargs: dict
         Extra keyword arguments passed to ``rhs``, ``jac`` and possibly ``dx0cb``.
     dx0cb : callable
@@ -88,13 +96,13 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
 
     return adaptive(rhs, jac, np.ascontiguousarray(y0, dtype=np.float64), x0,
                     xend, atol, rtol, method, nsteps, dx0, dx_min, dx_max,
-                    autorestart, return_on_error, cb_kwargs, dx0cb, dx_max_cb)
+                    autorestart, return_on_error, cb_kwargs, **kwargs)
 
 
 def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
                          dx_min=.0, dx_max=.0, method='bsimp', nsteps=500,
                          check_callable=False, check_indexing=False,
-                         autorestart=0, return_on_error=False, cb_kwargs=None, dx0cb=None, dx_max_cb=None):
+                         autorestart=0, return_on_error=False, cb_kwargs=None, **kwargs):
     """ Integrates a system of ordinary differential equations (user chosen output).
 
     Parameters
@@ -131,6 +139,14 @@ def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
         Autorestarts on error (requires autonomous system).
     return_on_error : bool
         Instead of raising an exception return silently (see info['success'] & info['nreached']).
+    record_rhs_xvals : bool
+        When True: will return x values for rhs calls in ``info['rhs_xvals']``.
+    record_jac_xvals : bool
+        When True will return x values for jac calls in ``info['jac_xvals']``.
+    record_order : bool
+        When True will return used time stepper order in ``info['orders']``.
+    record_fpe : bool
+        When True will return observed floating point errors in ``info['fpes']``. (see ``fpes``)
     cb_kwargs : dict
         Extra keyword arguments passed to ``rhs`` and ``jac``.
     dx0cb : callable
@@ -159,4 +175,4 @@ def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
                       np.ascontiguousarray(y0, dtype=np.float64),
                       np.ascontiguousarray(xout, dtype=np.float64), atol, rtol,
                       method, nsteps, dx0, dx_min, dx_max,
-                      autorestart, return_on_error, cb_kwargs, dx0cb, dx_max_cb)
+                      autorestart, return_on_error, cb_kwargs, **kwargs)
