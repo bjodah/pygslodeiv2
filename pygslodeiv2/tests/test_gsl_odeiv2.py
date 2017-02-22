@@ -78,6 +78,8 @@ def test_integrate_adaptive(method, forgiveness):
     xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
     xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
     yref = decay_get_Cref(k, y0, xout)
+    assert info['success']
+    assert info['atol'] == atol and info['rtol'] == rtol
     assert np.allclose(yout, yref,
                        rtol=forgiveness*rtol,
                        atol=forgiveness*atol)
@@ -106,8 +108,8 @@ def test_integrate_predefined(method, forgiveness):
     yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
     yout, info = integrate_predefined(f, j, y0, xout, **kwargs)
     yref = decay_get_Cref(k, y0, xout)
-    print(yout)
-    print(yref)
+    assert info['success']
+    assert info['atol'] == atol and info['rtol'] == rtol
     assert np.allclose(yout, yref,
                        rtol=forgiveness*rtol,
                        atol=forgiveness*atol)
