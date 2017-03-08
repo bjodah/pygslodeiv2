@@ -1,3 +1,7 @@
+v0.7.4
+======
+- Fix signature in cython pxd
+
 v0.7.3
 ======
 - return atol & rtol in info dict.
