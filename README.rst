@@ -4,6 +4,12 @@ pygslodeiv2
 .. image:: http://hera.physchem.kth.se:9090/api/badges/bjodah/pygslodeiv2/status.svg
    :target: http://hera.physchem.kth.se:9090/bjodah/pygslodeiv2
    :alt: Build status
+.. image:: https://circleci.com/gh/bjodah/pygslodeiv2.svg?style=svg
+   :target: https://circleci.com/gh/bjodah/pygslodeiv2
+   :alt: Build status on CircleCI
+.. image:: https://secure.travis-ci.org/bjodah/pygslodeiv2.svg?branch=master
+   :target: http://travis-ci.org/bjodah/pygslodeiv2
+   :alt: Build status on Travis-CI
 .. image:: https://img.shields.io/pypi/v/pygslodeiv2.svg
    :target: https://pypi.python.org/pypi/pygslodeiv2
    :alt: PyPI version
