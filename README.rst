@@ -53,8 +53,8 @@ callback for calculating the jacobian.
 
 You may also want to know that you can use ``pygslodeiv2`` from
 `pyodesys <https://github.com/bjodah/pyodesys>`_
-which can e.g. derive the Jacobian analytically for you (pyodesys also provides
-plotting functions, C++ code-generation and more).
+which can e.g. derive the Jacobian analytically (using SymPy). ``pyodesys`` also provides
+plotting functions, C++ code-generation and more.
 
 Documentation
 -------------
