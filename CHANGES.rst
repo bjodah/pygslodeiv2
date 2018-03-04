@@ -1,3 +1,7 @@
+v0.8.2
+======
+- New upstream AnyODE version (12)
+
 v0.8.1
 ======
 - New upstream AnyODE version (11)
