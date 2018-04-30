@@ -25,6 +25,6 @@ TEST_CASE( "adaptive_autorestart", "[simple_adaptive]" ) {
     auto& yout = tout_yout.second;
     const int ref = tout.size() * odesys.get_ny();
     REQUIRE( ref == yout.size() );
-    REQUIRE( odesys.last_integration_info["n_steps"] > 1 );
-    REQUIRE( odesys.last_integration_info["n_steps"] < 997 );
+    REQUIRE( odesys.current_info.nfo_int["n_steps"] > 1 );
+    REQUIRE( odesys.current_info.nfo_int["n_steps"] < 997 );
 }
