@@ -118,8 +118,8 @@ def test_integrate_predefined(method, forgiveness):
     if method in requires_jac:
         assert info['njev'] > 0
     if os.name == 'posix':
-        assert info['time_cpu'] > 1e-9
-        assert info['time_wall'] > 1e-9
+        assert info['time_cpu'] >= 0
+        assert info['time_wall'] >= 0
 
 
 def test_bad_f():

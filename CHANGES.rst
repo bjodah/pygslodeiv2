@@ -1,3 +1,7 @@
+v0.8.3
+======
+- Relax tests for 'time_cpu' & 'time_jac'
+
 v0.8.2
 ======
 - New upstream AnyODE version (12)
