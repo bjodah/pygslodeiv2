@@ -20,10 +20,10 @@ steppers = requires_jac + ('rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'msadams')
 fpes = {str(k.decode('utf-8')): v for k, v in dict(_fpes).items()}
 
 cdef dict get_last_info(PyOdeSys * odesys, success=True):
-    info = {str(k.decode('utf-8')): v for k, v in dict(odesys.last_integration_info).items()}
-    info.update({str(k.decode('utf-8')): v for k, v in dict(odesys.last_integration_info_dbl).items()})
-    info.update({str(k.decode('utf-8')): np.array(v, dtype=np.float64) for k, v in dict(odesys.last_integration_info_vecdbl).items()})
-    info.update({str(k.decode('utf-8')): np.array(v, dtype=int) for k, v in dict(odesys.last_integration_info_vecint).items()})
+    info = {str(k.decode('utf-8')): v for k, v in dict(odesys.current_info.nfo_int).items()}
+    info.update({str(k.decode('utf-8')): v for k, v in dict(odesys.current_info.nfo_dbl).items()})
+    info.update({str(k.decode('utf-8')): np.array(v, dtype=np.float64) for k, v in dict(odesys.current_info.nfo_vecdbl).items()})
+    info.update({str(k.decode('utf-8')): np.array(v, dtype=int) for k, v in dict(odesys.current_info.nfo_vecint).items()})
     info['nfev'] = odesys.nfev
     info['njev'] = odesys.njev
     info['success'] = success

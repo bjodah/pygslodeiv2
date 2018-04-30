@@ -29,7 +29,7 @@ namespace gsl_odeiv2_anyode {
     int rhs_cb(double t, const double y[], double ydot[], void *user_data) {
         auto& odesys = *static_cast<OdeSys*>(user_data);
         if (odesys.record_rhs_xvals)
-            odesys.last_integration_info_vecdbl["rhs_xvals"].push_back(t);
+            odesys.current_info.nfo_vecdbl["rhs_xvals"].push_back(t);
         AnyODE::Status status = odesys.rhs(t, y, ydot);
         return handle_status_(status);
     }
@@ -39,7 +39,7 @@ namespace gsl_odeiv2_anyode {
         // callback of req. signature wrapping OdeSys method.
         auto& odesys = *static_cast<OdeSys*>(user_data);
         if (odesys.record_jac_xvals)
-            odesys.last_integration_info_vecdbl["jac_xvals"].push_back(t);
+            odesys.current_info.nfo_vecdbl["jac_xvals"].push_back(t);
         AnyODE::Status status = odesys.dense_jac_rmaj(t, y, nullptr, dfdy, odesys.get_ny(), dfdt);
         return handle_status_(status);
     }
@@ -75,10 +75,10 @@ namespace gsl_odeiv2_anyode {
 
     template <class OdeSys>
     void set_integration_info(OdeSys * odesys, const GSLIntegrator& integrator){
-        odesys->last_integration_info["nfev"] = odesys->nfev;
-        odesys->last_integration_info["njev"] = odesys->njev;
-        odesys->last_integration_info["n_steps"] = integrator.get_n_steps();
-        odesys->last_integration_info["n_failed_steps"] = integrator.get_n_failed_steps();
+        odesys->current_info.nfo_int["nfev"] = odesys->nfev;
+        odesys->current_info.nfo_int["njev"] = odesys->njev;
+        odesys->current_info.nfo_int["n_steps"] = integrator.get_n_steps();
+        odesys->current_info.nfo_int["n_failed_steps"] = integrator.get_n_failed_steps();
     }
 
     template <class OdeSys>
@@ -111,14 +111,11 @@ namespace gsl_odeiv2_anyode {
                                              odesys->record_order, odesys->record_fpe);
         odesys->integrator = static_cast<void*>(&integr);
 
-        odesys->last_integration_info.clear();
-        odesys->last_integration_info_dbl.clear();
-        odesys->last_integration_info_vecdbl.clear();
-        odesys->last_integration_info_vecint.clear();
+        odesys->current_info.clear();
         if (odesys->record_rhs_xvals)
-            odesys->last_integration_info_vecdbl["rhs_xvals"] = {};
+            odesys->current_info.nfo_vecdbl["rhs_xvals"] = {};
         if (odesys->record_jac_xvals)
-            odesys->last_integration_info_vecdbl["jac_xvals"] = {};
+            odesys->current_info.nfo_vecdbl["jac_xvals"] = {};
 
         std::time_t cput0 = std::clock();
         auto t_start = std::chrono::high_resolution_clock::now();
@@ -128,14 +125,14 @@ namespace gsl_odeiv2_anyode {
                 std::bind(&OdeSys::get_dx_max, odesys, std::placeholders::_1 , std::placeholders::_2))
 	     : gsl_odeiv2_cxx::get_dx_max_fn()));
 
-        odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
-        odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(
+        odesys->current_info.nfo_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
+        odesys->current_info.nfo_dbl["time_wall"] = std::chrono::duration<double>(
                 std::chrono::high_resolution_clock::now() - t_start).count();
 
         if (odesys->record_order)
-            odesys->last_integration_info_vecint["orders"] = integr.orders_seen;
+            odesys->current_info.nfo_vecint["orders"] = integr.orders_seen;
         if (odesys->record_fpe)
-            odesys->last_integration_info_vecint["fpes"] = integr.fpes_seen;
+            odesys->current_info.nfo_vecint["fpes"] = integr.fpes_seen;
 
         set_integration_info<OdeSys>(odesys, integr);
         return result;
@@ -172,13 +169,11 @@ namespace gsl_odeiv2_anyode {
                                              odesys->record_order, odesys->record_fpe);
         odesys->integrator = static_cast<void*>(&integr);
 
-        odesys->last_integration_info.clear();
-        odesys->last_integration_info_dbl.clear();
-        odesys->last_integration_info_vecdbl.clear();
+        odesys->current_info.clear();
         if (odesys->record_rhs_xvals)
-            odesys->last_integration_info_vecdbl["rhs_xvals"] = {};
+            odesys->current_info.nfo_vecdbl["rhs_xvals"] = {};
         if (odesys->record_jac_xvals)
-            odesys->last_integration_info_vecdbl["jac_xvals"] = {};
+            odesys->current_info.nfo_vecdbl["jac_xvals"] = {};
 
         std::time_t cput0 = std::clock();
         auto t_start = std::chrono::high_resolution_clock::now();
@@ -188,14 +183,14 @@ namespace gsl_odeiv2_anyode {
                 std::bind(&OdeSys::get_dx_max, odesys, std::placeholders::_1 , std::placeholders::_2))
 	     : gsl_odeiv2_cxx::get_dx_max_fn()));
 
-        odesys->last_integration_info_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
-        odesys->last_integration_info_dbl["time_wall"] = std::chrono::duration<double>(
+        odesys->current_info.nfo_dbl["time_cpu"] = (std::clock() - cput0) / (double)CLOCKS_PER_SEC;
+        odesys->current_info.nfo_dbl["time_wall"] = std::chrono::duration<double>(
                 std::chrono::high_resolution_clock::now() - t_start).count();
 
         if (odesys->record_order)
-            odesys->last_integration_info_vecint["orders"] = integr.orders_seen;
+            odesys->current_info.nfo_vecint["orders"] = integr.orders_seen;
         if (odesys->record_fpe)
-            odesys->last_integration_info_vecint["fpes"] = integr.fpes_seen;
+            odesys->current_info.nfo_vecint["fpes"] = integr.fpes_seen;
 
         set_integration_info<OdeSys>(odesys, integr);
         return nreached;
