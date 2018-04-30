@@ -26,7 +26,7 @@ TEST_CASE( "decay_adaptive", "[multi_adaptive]" ) {
         for (unsigned j=0; j<tout.size(); ++j){
             REQUIRE( std::abs(y0[idx]*std::exp(tout[0]-tout[j]) - yout[j]) < 1e-8 );
         }
-        REQUIRE( systems[idx]->last_integration_info["n_steps"] > 1 );
-        REQUIRE( systems[idx]->last_integration_info["n_steps"] < 997 );
+        REQUIRE( systems[idx]->current_info.nfo_int["n_steps"] > 1 );
+        REQUIRE( systems[idx]->current_info.nfo_int["n_steps"] < 997 );
     }
 }
