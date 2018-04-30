@@ -76,7 +76,6 @@ def integrate_adaptive(rhs, jac, y0, x0, xend, atol, rtol, dx0=.0,
     dx_max_cb: callable
         Callback for calculating dx_max. Signature: ``f(x, y[:]) -> float``.
 
-
     Returns
     -------
     (xout, yout, info):
@@ -128,12 +127,12 @@ def integrate_predefined(rhs, jac, y0, xout, atol, rtol, dx0=.0,
         maximum step (default: 0.0)
     method : str
         One of: 'rk2', 'rk4', 'rkf45', 'rkck', 'rk8pd', 'rk1imp',
-            'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf'
+        'rk2imp', 'rk4imp', 'bsimp', 'msadams', 'msbdf'.
     nsteps : int
-        maximum number of steps (default: 500)
-    check_callable : bool (default: False)
-        perform signature sanity checks on ``rhs`` and ``jac``
-    check_indexing : bool (default: False)
+        maximum number of steps (default: 500).
+    check_callable : bool
+        perform signature sanity checks on ``rhs`` and ``jac``.
+    check_indexing : bool
         perform item setting sanity checks on ``rhs`` and ``jac``.
     autorestart : int
         Autorestarts on error (requires autonomous system).

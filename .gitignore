@@ -7,7 +7,7 @@ dist/
 cython_debug/
 pygslodeiv2/_gsl_odeiv2.c*
 MANIFEST
-.cache/
+.*cache/
 doc/
 **/.ipynb_checkpoints/
 **.egg-info
