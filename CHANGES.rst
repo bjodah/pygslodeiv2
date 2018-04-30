@@ -1,3 +1,7 @@
+v0.8.4
+======
+- Only require C++11
+
 v0.8.3
 ======
 - Relax tests for 'time_cpu' & 'time_jac'
