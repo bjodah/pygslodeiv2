@@ -1,5 +1,6 @@
 {% set name = "pygslodeiv2" %}
 {% set version = "0.9.0+git" %}
+{% set variant = "openblas" %}
 
 package:
   name: {{ name|lower }}
@@ -9,14 +10,18 @@ source:
   git_url: ../
 
 build:
-  number: 0
+  number: 200
   skip: True  # [win]
   skip: True  # [osx and py27]
-  script: python -m pip install --no-deps --ignore-installed .
+  features:
+    - blas_{{ variant }}  # [not win]
+  script: PYGSLODEIV2_BLAS=openblas python -m pip install --no-deps --ignore-installed .
 
 requirements:
   build:
     - toolchain
+    - blas 1.1 {{ variant }}  # [not win]
+    - openblas 0.2.20*  # [not win]
     - python
     - setuptools
     - pip
@@ -24,6 +29,8 @@ requirements:
     - gsl
     - cython
   run:
+    - blas 1.1 {{ variant }}  # [not win]
+    - openblas 0.2.20*  # [not win]
     - python
     - numpy >=1.11
     - gsl
