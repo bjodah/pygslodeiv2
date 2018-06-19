@@ -10,13 +10,10 @@ cd tests/; make EXTRA_FLAGS=-DNDEBUG; make clean; cd -
 cd tests/; make CXX=clang++-6.0 EXTRA_FLAGS=-fsanitize=address; make clean; cd -
 cd tests/; make CXX=clang++-6.0 EXTRA_FLAGS=-fsanitize=undefined; make clean; cd -
 
-python2.7 setup.py sdist
-for PYTHON in python2.7 python3; do
-    (cd dist/; $PYTHON -m pip install $PKG_NAME-$($PYTHON ../setup.py --version).tar.gz)
-    (cd /; $PYTHON -m pytest --pyargs $PKG_NAME)
-    $PYTHON -m pip install --user -e .[all]
-done
-PYTHONPATH=$(pwd) PYTHON=python2.7 ./scripts/run_tests.sh
+python3 setup.py sdist
+(cd dist/; python3 -m pip install $PKG_NAME-$(python3 ../setup.py --version).tar.gz)
+(cd /; python3 -m pytest --pyargs $PKG_NAME)
+python3 -m pip install --user -e .[all]
 PYTHONPATH=$(pwd) PYTHON=python3 ./scripts/run_tests.sh --cov $PKG_NAME --cov-report html
 ./scripts/coverage_badge.py htmlcov/ htmlcov/coverage.svg
 
