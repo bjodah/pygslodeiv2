@@ -5,7 +5,10 @@ if [[ "$CI_BRANCH" =~ ^v[0-9]+.[0-9]?* ]]; then
     echo ${CI_BRANCH} | tail -c +2 > __conda_version__.txt
 fi
 
-(cd tests/; make)
+cd tests/; make EXTRA_FLAGS=-D_GLIBCXX_DEBUG; make clean; cd -
+cd tests/; make EXTRA_FLAGS=-DNDEBUG; make clean; cd -
+cd tests/; make CXX=clang++-6.0 EXTRA_FLAGS=-fsanitize=address; make clean; cd -
+cd tests/; make CXX=clang++-6.0 EXTRA_FLAGS=-fsanitize=undefined; make clean; cd -
 
 python2.7 setup.py sdist
 for PYTHON in python2.7 python3; do

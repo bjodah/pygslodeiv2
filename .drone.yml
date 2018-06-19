@@ -1,5 +1,5 @@
 build:
-  image: bjodah/bjodahimg16dev:v1.3
+  image: bjodah/bjodahimg18dev:v1.2
   commands:
     - bash -c '[[ $(python setup.py --version) =~ ^[0-9]+.* ]]'
     - ./scripts/ci.sh pygslodeiv2
