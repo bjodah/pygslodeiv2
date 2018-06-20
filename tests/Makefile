@@ -13,7 +13,11 @@ OPENMP_LIB ?= -lgomp
 
 test: test_gsl_odeiv2_anyode test_gsl_odeiv2_anyode_parallel test_gsl_odeiv2_anyode_autorestart test_gsl_odeiv2_cxx _test_gsl_odeiv2_anyode.py
 	./test_gsl_odeiv2_anyode --abortx 1
+ifeq ($(CXX),clang++-6.0)
+	@echo "skipping openmp when using clang"
+else
 	./test_gsl_odeiv2_anyode_parallel --abortx 1
+endif
 	./test_gsl_odeiv2_anyode_autorestart --abortx 1
 	./test_gsl_odeiv2_cxx --abortx 1
 	python3 ./_test_gsl_odeiv2_anyode.py
@@ -30,7 +34,11 @@ test_%: test_%.cpp ../pygslodeiv2/include/gsl_odeiv2_cxx.hpp catch.hpp testing_u
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $@ $< $(LIBS)
 
 test_gsl_odeiv2_anyode_parallel: test_gsl_odeiv2_anyode_parallel.cpp ../pygslodeiv2/include/gsl_odeiv2_*.hpp
+ifeq ($(CXX),clang++-6.0)
+	@echo "skipping openmp when using clang"
+else
 	$(CXX) $(CXXFLAGS) $(OPENMP_FLAG) $(INCLUDE) -o $@ $< $(LIBS) $(OPENMP_LIB)
+endif
 
 catch.hpp: catch.hpp.bz2
 	bunzip2 -k -f $<
