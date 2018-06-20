@@ -13,7 +13,7 @@ TEST_CASE( "decay_adaptive", "[multi_adaptive]" ) {
     std::vector<double> t0 {{ 1.0, 3.0 }};  // delta = 2
     std::vector<double> tend {{ 2.0, 5.0 }};  // delta = 3
     int mxsteps = 0;  // => default
-    std::vector<double> atol(1, 1e-10);
+    double atol = 1e-10;
     std::vector<double> dx0 {{ 1e-10, 1e-10 }};
     std::vector<double> dx_min {{ 1e-16, 1e-16 }};
     std::vector<double> dx_max {{ 1.0, 1.0 }};
