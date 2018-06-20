@@ -12,7 +12,7 @@ TEST_CASE( "methods", "[GSLIntegrator]" ) {
     auto intgr = gsl_odeiv2_cxx::GSLIntegrator(
 	    rhs_cb, nullptr, ny, gsl_odeiv2_cxx::StepType::MSADAMS,
 	    dx0, atol, rtol, user_data);
-    std::vector<double> y0 {{1.0}};
+    std::vector<double> y0(1, 1.0);
     std::vector<double> tout {{0.0, 1.0}};
     std::vector<double> yout(2);
     intgr.predefined(tout.size(), &tout[0], &y0[0], &yout[0]);
@@ -36,7 +36,7 @@ TEST_CASE( "adaptive", "[GSLIntegrator]" ) {
 	    rhs_cb, nullptr, ny, gsl_odeiv2_cxx::StepType::MSADAMS,
 	    dx0, atol, rtol, user_data);
     intgr.m_drv.set_max_num_steps(1019);
-    std::vector<double> y0 {{1.0}};
+    std::vector<double> y0(1, 1.0);
     double xend = 1.0;
     auto xout_yout = intgr.adaptive(0.0, xend, &y0[0], autorestart,
 				    return_on_error, get_dx_max);
@@ -74,7 +74,7 @@ TEST_CASE( "predefined", "[GSLIntegrator]" ) {
     for (int idx=0; idx<nt; ++idx)
         tout[idx] = idx*tend/(nt - 1);
     std::vector<double> yout(nt*ny);
-    std::vector<double> y0 {{1.0}};
+    std::vector<double> y0(1, 1.0);
     auto nout = intgr.predefined(nt, &tout[0], &y0[0], &yout[0], autorestart,
 				      return_on_error, get_dx_max2);
     for (int idx=0; idx<nt; ++idx){
