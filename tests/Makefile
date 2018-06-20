@@ -25,11 +25,7 @@ endif
 clean:
 	rm catch.hpp
 	rm test_gsl_odeiv2_anyode
-ifeq ($(CXX),clang++-6.0)
-	@echo "skipping openmp when using clang"
-else
 	rm test_gsl_odeiv2_anyode_parallel
-endif
 	rm test_gsl_odeiv2_anyode_autorestart
 	rm test_gsl_odeiv2_cxx
 
@@ -40,6 +36,7 @@ test_%: test_%.cpp ../pygslodeiv2/include/gsl_odeiv2_cxx.hpp catch.hpp testing_u
 test_gsl_odeiv2_anyode_parallel: test_gsl_odeiv2_anyode_parallel.cpp ../pygslodeiv2/include/gsl_odeiv2_*.hpp
 ifeq ($(CXX),clang++-6.0)
 	@echo "skipping openmp when using clang"
+	touch $@
 else
 	$(CXX) $(CXXFLAGS) $(OPENMP_FLAG) $(INCLUDE) -o $@ $< $(LIBS) $(OPENMP_LIB)
 endif
