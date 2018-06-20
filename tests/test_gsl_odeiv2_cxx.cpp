@@ -75,7 +75,6 @@ TEST_CASE( "predefined", "[GSLIntegrator]" ) {
         tout[idx] = idx*tend/(nt - 1);
     std::vector<double> yout(nt*ny);
     std::vector<double> y0 {{1.0}};
-    double xend = 1.0;
     auto nout = intgr.predefined(nt, &tout[0], &y0[0], &yout[0], autorestart,
 				      return_on_error, get_dx_max2);
     for (int idx=0; idx<nt; ++idx){
