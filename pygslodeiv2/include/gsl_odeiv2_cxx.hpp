@@ -358,7 +358,7 @@ namespace gsl_odeiv2_cxx {
             while (curr_x < xend){
                 idx++;
                 if (idx > mxsteps){
-                    std::string msg = StreamFmt() << std::scientific << "[GSL ERROR] Maximum number of steps reached (at t="
+                    std::string msg = StreamFmt() << std::scientific << "[GSL_ODEIV2_CXX ERROR] Maximum number of steps reached (at t="
                                                   << curr_x << "): " << mxsteps << '\n';
                     if (return_on_error){
                         std::cerr << msg << '\n';
@@ -372,7 +372,9 @@ namespace gsl_odeiv2_cxx {
                 } else if (curr_dx < this->m_drv.m_driver->hmin ) {
                     curr_dx = this->m_drv.m_driver->hmin;
                 }
-                yout.insert(yout.end(), yout.end() - ny, yout.end());
+                for (int i=0; i<ny; ++i){
+                    yout.push_back(*(yout.end() - ny));
+                }
                 if (get_dx_max)
 		    this->m_drv.set_max_step(get_dx_max(curr_x, &(*(yout.end() - ny))));
                 int info = this->m_evo.apply(this->m_ctrl, this->m_stp, &(this->m_sys),
