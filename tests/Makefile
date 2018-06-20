@@ -25,7 +25,11 @@ endif
 clean:
 	rm catch.hpp
 	rm test_gsl_odeiv2_anyode
+ifeq ($(CXX),clang++-6.0)
+	@echo "skipping openmp when using clang"
+else
 	rm test_gsl_odeiv2_anyode_parallel
+endif
 	rm test_gsl_odeiv2_anyode_autorestart
 	rm test_gsl_odeiv2_cxx
 
