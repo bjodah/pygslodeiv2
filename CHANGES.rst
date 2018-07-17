@@ -1,3 +1,7 @@
+v0.8.5
+======
+- Updated AnyODE version (17)
+
 v0.8.4
 ======
 - Only require C++11

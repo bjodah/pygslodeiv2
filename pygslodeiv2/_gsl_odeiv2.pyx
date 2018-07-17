@@ -43,7 +43,7 @@ def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, doubl
     if np.isnan(y0).any():
         raise ValueError("NaN found in y0")
 
-    odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL, NULL,
+    odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL, NULL, NULL,
                           <PyObject *>cb_kwargs, -1, -1, 0, 0, <PyObject *>dx0cb, <PyObject *>dx_max_cb)
     odesys.record_rhs_xvals = record_rhs_xvals
     odesys.record_jac_xvals = record_jac_xvals
