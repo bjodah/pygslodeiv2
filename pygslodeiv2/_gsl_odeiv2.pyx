@@ -36,6 +36,7 @@ def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, doubl
              bool record_fpe=False, dx0cb=None, dx_max_cb=None):
     cdef:
         int ny = y0.shape[y0.ndim - 1]
+        int mlower=-1, mupper=-1, nquads=0, nroots=0, nnz=-1
         PyOdeSys * odesys
 
     if method in requires_jac and jac is None:
@@ -44,7 +45,7 @@ def adaptive(rhs, jac, cnp.ndarray[cnp.float64_t, mode='c'] y0, double x0, doubl
         raise ValueError("NaN found in y0")
 
     odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL, NULL, NULL,
-                          <PyObject *>cb_kwargs, -1, -1, 0, 0, <PyObject *>dx0cb, <PyObject *>dx_max_cb)
+                          <PyObject *>cb_kwargs, mlower, mupper, nquads, nroots, <PyObject *>dx0cb, <PyObject *>dx_max_cb, nnz)
     odesys.record_rhs_xvals = record_rhs_xvals
     odesys.record_jac_xvals = record_jac_xvals
     odesys.record_order = record_order
@@ -74,13 +75,14 @@ def predefined(rhs, jac,
         cnp.ndarray[cnp.float64_t, ndim=2] yout = np.empty((xout.size, ny))
         int nreached
         PyOdeSys * odesys
+        int mlower=-1, mupper=-1, nquads=0, nroots=0, nnz=-1
 
     if method in requires_jac and jac is None:
         raise ValueError("Method requires explicit jacobian callback")
     if np.isnan(y0).any():
         raise ValueError("NaN found in y0")
     odesys = new PyOdeSys(ny, <PyObject *>rhs, <PyObject *>jac, NULL, NULL, NULL, <PyObject *>cb_kwargs,
-                          -1, -1, 0, 0, <PyObject *>dx0cb, <PyObject *>dx_max_cb)
+                          mlower, mupper, nquads, nroots, <PyObject *>dx0cb, <PyObject *>dx_max_cb, nnz)
     odesys.record_rhs_xvals = record_rhs_xvals
     odesys.record_jac_xvals = record_jac_xvals
     odesys.record_order = record_order
