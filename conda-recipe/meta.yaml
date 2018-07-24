@@ -11,8 +11,8 @@ source:
 
 build:
   number: 200
-  skip: True  # [win]
-  skip: True  # [osx and py27]
+  skip: true  # [win and not py>=35]
+  skip: true  # [osx and py27]
   features:
     - blas_{{ variant }}  # [not win]
   script: PYGSLODEIV2_BLAS=openblas python -m pip install --no-deps --ignore-installed .
