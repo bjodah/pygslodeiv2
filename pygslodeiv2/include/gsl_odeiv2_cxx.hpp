@@ -163,8 +163,8 @@ namespace gsl_odeiv2_cxx {
             throw std::runtime_error(StreamFmt() << "Unknown stepper type name: " << name);
     }
     bool requires_jacobian(StepType styp){
-        if ((styp == StepType::RK1IMP) or (styp == StepType::RK2IMP) or
-            (styp == StepType::RK4IMP) or (styp == StepType::BSIMP) or
+        if ((styp == StepType::RK1IMP) || (styp == StepType::RK2IMP) ||
+            (styp == StepType::RK4IMP) || (styp == StepType::BSIMP) ||
             (styp == StepType::MSBDF))
             return true;
         else
