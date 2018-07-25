@@ -11,7 +11,7 @@ source:
 
 build:
   number: 200
-  skip: true  # [win and not py>=35]
+  skip: true  # [win]
   skip: true  # [osx and py27]
   features:
     - blas_{{ variant }}  # [not win]
