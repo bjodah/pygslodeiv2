@@ -1,6 +1,6 @@
-v0.8.5
+v0.9.0
 ======
-- Updated AnyODE version (17)
+- Updated AnyODE version (19)
 
 v0.8.4
 ======
