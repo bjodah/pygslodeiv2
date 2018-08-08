@@ -1,7 +1,8 @@
 graft external/anyode/include
 graft external/anyode/cython_def
 include external/anyode/LICENSE
-recursive-include */include *.hpp *.pxd *.pyx
+recursive-include pygslodeiv2/include *.hpp *.pxd
+include pygslodeiv2/*.pyx
 include AUTHORS
 include CHANGES.rst
 include LICENSE
