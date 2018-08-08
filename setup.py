@@ -32,10 +32,9 @@ for k, v in list(env.items()):
     env[k] = os.environ.get('%s_%s' % (pkg_name.upper(), k), v)
 
 
-USE_CYTHON = os.path.exists(_path_under_setup(pkg_name, '_gsl_odeiv2.pyx'))
+USE_CYTHON = not os.path.exists(_path_under_setup(pkg_name, '_gsl_odeiv2.cpp'))
 package_include = os.path.join(pkg_name, 'include')
 
-# Cythonize .pyx file if it exists (not in source distribution)
 ext_modules = []
 
 if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
