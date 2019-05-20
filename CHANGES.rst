@@ -1,5 +1,9 @@
+v0.9.2
+======
+- fix illegal escape sequence in setup.py
+
 v0.9.1
-=======
+======
 - New python signature: t is now a NumPy scalar
 
 v0.9.0

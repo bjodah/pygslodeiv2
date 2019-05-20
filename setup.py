@@ -87,7 +87,7 @@ else:  # set `__version__` from _release.py:
         else:
             if 'develop' not in sys.argv:
                 warnings.warn("Using git to derive version: dev-branches may compete.")
-                __version__ = re.sub('v([0-9.]+)-(\d+)-(\w+)', r'\1.post\2+\3', _git_version)  # .dev < '' < .post
+                __version__ = re.sub(r'v([0-9.]+)-(\d+)-(\w+)', r'\1.post\2+\3', _git_version)  # .dev < '' < .post
 
 classifiers = [
     "Development Status :: 4 - Beta",

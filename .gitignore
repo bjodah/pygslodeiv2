@@ -17,3 +17,4 @@ tests/catch.hpp
 tests/test_gsl_odeiv2_anyode_parallel
 tests/_gsl_odeiv2_anyode.cpp
 tests/test_gsl_odeiv2_anyode_autorestart
+tmp/
