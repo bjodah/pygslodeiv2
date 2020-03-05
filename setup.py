@@ -14,6 +14,13 @@ import warnings
 
 from setuptools import setup
 from setuptools.extension import Extension
+try:
+    import cython
+except ImportError:
+    _HAVE_CYTHON = False
+else:
+    _HAVE_CYTHON = True
+    assert cython  # silence pep8
 
 
 pkg_name = 'pygslodeiv2'
@@ -22,7 +29,7 @@ license = 'GPL-3.0'
 
 
 def _path_under_setup(*args):
-    return os.path.join(os.path.dirname(__file__), *args)
+    return os.path.join(*args)
 
 release_py_path = _path_under_setup(pkg_name, '_release.py')
 config_py_path = _path_under_setup(pkg_name, '_config.py')
@@ -32,7 +39,17 @@ for k, v in list(env.items()):
     env[k] = os.environ.get('%s_%s' % (pkg_name.upper(), k), v)
 
 
-USE_CYTHON = not os.path.exists(_path_under_setup(pkg_name, '_gsl_odeiv2.cpp'))
+_src = {ext: _path_under_setup(pkg_name, '_gsl_odeiv2.' + ext) for ext in "cpp pyx".split()}
+if _HAVE_CYTHON and os.path.exists(_src["pyx"]):
+    # Possible that a new release of Python needs a re-rendered Cython source,
+    # or that we want to include possible bug-fix to Cython, disable by manually
+    # deleting .pyx file from source distribution.
+    USE_CYTHON = True
+    if os.path.exists(_src['cpp']):
+        os.unlink(_src['cpp'])  # ensure c++ source is re-generated.
+else:
+    USE_CYTHON = False
+
 package_include = os.path.join(pkg_name, 'include')
 
 ext_modules = []
@@ -40,8 +57,7 @@ ext_modules = []
 if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
         '--help-commands', 'egg_info', 'clean', '--version'):
     import numpy as np
-    ext = '.pyx' if USE_CYTHON else '.cpp'
-    sources = [os.path.join('pygslodeiv2', '_gsl_odeiv2' + ext)]
+    sources = [_src["pyx" if USE_CYTHON else "cpp"]]
     ext_modules = [Extension('%s._gsl_odeiv2' % pkg_name, sources)]
     if USE_CYTHON:
         from Cython.Build import cythonize
@@ -61,14 +77,6 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
 _version_env_var = '%s_RELEASE_VERSION' % pkg_name.upper()
 RELEASE_VERSION = os.environ.get(_version_env_var, '')
 
-# http://conda.pydata.org/docs/build.html#environment-variables-set-during-the-build-process
-if os.environ.get('CONDA_BUILD', '0') == '1':
-    try:
-        RELEASE_VERSION = 'v' + open(
-            '__conda_version__.txt', 'rt').readline().rstrip()
-    except IOError:
-        pass
-
 
 if len(RELEASE_VERSION) > 1:
     if RELEASE_VERSION[0] != 'v':
@@ -81,13 +89,14 @@ else:  # set `__version__` from _release.py:
     if __version__.endswith('git'):
         try:
             _git_version = subprocess.check_output(
-                ['git', 'describe', '--dirty']).rstrip().decode('utf-8').replace('-dirty', '.dirty')
+                ['git', 'describe', '--dirty']).rstrip().decode('utf-8')
         except subprocess.CalledProcessError:
             warnings.warn("A git-archive is being installed - version information incomplete.")
         else:
             if 'develop' not in sys.argv:
                 warnings.warn("Using git to derive version: dev-branches may compete.")
-                __version__ = re.sub(r'v([0-9.]+)-(\d+)-(\w+)', r'\1.post\2+\3', _git_version)  # .dev < '' < .post
+                _ver_tmplt = r'\1.post\2' if os.environ.get('CONDA_BUILD', '0') == '1' else r'\1.post\2+\3'
+                __version__ = re.sub('v([0-9.]+)-(\d+)-(\S+)', _ver_tmplt, _git_version)  # .dev < '' < .post
 
 classifiers = [
     "Development Status :: 4 - Beta",
