@@ -1,3 +1,8 @@
+v0.9.3
+======
+- update setup.py to re-run Cython when .pyx available
+- update setup.py to new requirements in more recent versions of setuptools
+
 v0.9.2
 ======
 - fix illegal escape sequence in setup.py
