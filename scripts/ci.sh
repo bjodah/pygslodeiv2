@@ -14,8 +14,9 @@ export CXX=g++-10
 cd tests/; make EXTRA_FLAGS=-D_GLIBCXX_DEBUG; make clean; cd -
 cd tests/; make EXTRA_FLAGS=-DNDEBUG; make clean; cd -
 
+PKG_VERSION=$(python3 setup.py --version)
 python3 setup.py sdist
-(cd dist/; python3 -m pip install $PKG_NAME-$(python3 ../setup.py --version).tar.gz)
+(cd dist/; python3 -m pip install $PKG_NAME-$PKG_VERSION.tar.gz)
 (cd /; python3 -m pytest --pyargs $PKG_NAME)
 python3 -m pip install --user -e .[all]
 PYTHONPATH=$(pwd) PYTHON=python3 ./scripts/run_tests.sh --cov $PKG_NAME --cov-report html
