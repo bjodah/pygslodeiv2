@@ -1,6 +1,20 @@
 CXX ?= g++
 LIBS ?=-lgsl -lgslcblas -lm
-CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -pedantic -g -ggdb -O0
+WARNINGS ?= \
+-Wall \
+-Wextra \
+-Wredundant-decls \
+-Wcast-align \
+-Wmissing-include-dirs \
+-Wswitch-enum \
+-Wswitch-default \
+-Winvalid-pch \
+-Wredundant-decls \
+-Wformat=2 \
+-Wmissing-format-attribute \
+-Wformat-nonliteral \
+-Wodr
+CXXFLAGS ?= -std=c++11 $(WARNINGS) -Werror -pedantic -g -ggdb -O0
 CXXFLAGS += $(EXTRA_FLAGS)
 INCLUDE ?= -I../pygslodeiv2/include -I../external/anyode/include
 EXTRA_FLAGS ?=
