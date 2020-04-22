@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pygslodeiv2 package &mdash; pygslodeiv2 0.9.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to pygslodeiv2’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pygslodeiv2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pygslodeiv2 package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pygslodeiv2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>pygslodeiv2 package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/pygslodeiv2.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pygslodeiv2">
+<span id="pygslodeiv2-package"></span><h1>pygslodeiv2 package<a class="headerlink" href="#module-pygslodeiv2" title="Permalink to this headline">¶</a></h1>
+<p>Python binding for odeiv2 in GNU Scientific Library (GSL).</p>
+<dl class="py function">
+<dt id="pygslodeiv2.get_include">
+<code class="sig-prename descclassname">pygslodeiv2.</code><code class="sig-name descname">get_include</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygslodeiv2.html#get_include"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygslodeiv2.get_include" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygslodeiv2.integrate_adaptive">
+<code class="sig-prename descclassname">pygslodeiv2.</code><code class="sig-name descname">integrate_adaptive</code><span class="sig-paren">(</span><em class="sig-param">rhs</em>, <em class="sig-param">jac</em>, <em class="sig-param">y0</em>, <em class="sig-param">x0</em>, <em class="sig-param">xend</em>, <em class="sig-param">atol</em>, <em class="sig-param">rtol</em>, <em class="sig-param">dx0=0.0</em>, <em class="sig-param">dx_min=0.0</em>, <em class="sig-param">dx_max=0.0</em>, <em class="sig-param">method='bsimp'</em>, <em class="sig-param">nsteps=500</em>, <em class="sig-param">check_callable=False</em>, <em class="sig-param">check_indexing=False</em>, <em class="sig-param">autorestart=0</em>, <em class="sig-param">return_on_error=False</em>, <em class="sig-param">cb_kwargs=None</em>, <em class="sig-param">\*\*kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygslodeiv2.html#integrate_adaptive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygslodeiv2.integrate_adaptive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrates a system of ordinary differential equations (solver chosen output).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>rhs</strong><span class="classifier">callable</span></dt><dd><p>Function with signature f(t, y, fout) which modifies fout <em>inplace</em>.</p>
+</dd>
+<dt><strong>jac</strong><span class="classifier">callable</span></dt><dd><p>Function with signature j(t, y, jmat_out, dfdx_out) which modifies
+jmat_out and dfdx_out <em>inplace</em>.</p>
+</dd>
+<dt><strong>y0</strong><span class="classifier">array_like</span></dt><dd><p>initial values of the dependent variables</p>
+</dd>
+<dt><strong>x0</strong><span class="classifier">float</span></dt><dd><p>initial value of the independent variable</p>
+</dd>
+<dt><strong>xend</strong><span class="classifier">float</span></dt><dd><p>stopping value for the independent variable</p>
+</dd>
+<dt><strong>atol</strong><span class="classifier">float</span></dt><dd><p>absolute tolerance</p>
+</dd>
+<dt><strong>rtol</strong><span class="classifier">float</span></dt><dd><p>relative tolerance</p>
+</dd>
+<dt><strong>dx0</strong><span class="classifier">float</span></dt><dd><p>initial step-size</p>
+</dd>
+<dt><strong>dx_min</strong><span class="classifier">float</span></dt><dd><p>minimum step (default: 0.0)</p>
+</dd>
+<dt><strong>dx_max</strong><span class="classifier">float</span></dt><dd><p>maximum step (default: 0.0)</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><dl class="simple">
+<dt>One of: ‘rk2’, ‘rk4’, ‘rkf45’, ‘rkck’, ‘rk8pd’, ‘rk1imp’,</dt><dd><p>‘rk2imp’, ‘rk4imp’, ‘bsimp’, ‘msadams’, ‘msbdf’</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>nsteps</strong><span class="classifier">int</span></dt><dd><p>maximum number of steps (default: 500)</p>
+</dd>
+<dt><strong>check_callable</strong><span class="classifier">bool (default: False)</span></dt><dd><p>perform signature sanity checks on <code class="docutils literal notranslate"><span class="pre">rhs</span></code> and <code class="docutils literal notranslate"><span class="pre">jac</span></code></p>
+</dd>
+<dt><strong>check_indexing</strong><span class="classifier">bool (default: False)</span></dt><dd><p>perform item setting sanity checks on <code class="docutils literal notranslate"><span class="pre">rhs</span></code> and <code class="docutils literal notranslate"><span class="pre">jac</span></code>.</p>
+</dd>
+<dt><strong>autorestart</strong><span class="classifier">int</span></dt><dd><p>Autorestarts on error (requires autonomous system).</p>
+</dd>
+<dt><strong>return_on_error</strong><span class="classifier">bool</span></dt><dd><p>Instead of raising an exception return silently (see info[‘success’]).</p>
+</dd>
+<dt><strong>record_rhs_xvals</strong><span class="classifier">bool</span></dt><dd><p>When True: will return x values for rhs calls in <code class="docutils literal notranslate"><span class="pre">info['rhs_xvals']</span></code>.</p>
+</dd>
+<dt><strong>record_jac_xvals</strong><span class="classifier">bool</span></dt><dd><p>When True will return x values for jac calls in <code class="docutils literal notranslate"><span class="pre">info['jac_xvals']</span></code>.</p>
+</dd>
+<dt><strong>record_order</strong><span class="classifier">bool</span></dt><dd><p>When True will return used time stepper order in <code class="docutils literal notranslate"><span class="pre">info['orders']</span></code>.</p>
+</dd>
+<dt><strong>record_fpe</strong><span class="classifier">bool</span></dt><dd><p>When True will return observed floating point errors in <code class="docutils literal notranslate"><span class="pre">info['fpes']</span></code>. (see <code class="docutils literal notranslate"><span class="pre">fpes</span></code>)</p>
+</dd>
+<dt><strong>cb_kwargs: dict</strong></dt><dd><p>Extra keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">rhs</span></code>, <code class="docutils literal notranslate"><span class="pre">jac</span></code> and possibly <code class="docutils literal notranslate"><span class="pre">dx0cb</span></code>.</p>
+</dd>
+<dt><strong>dx0cb</strong><span class="classifier">callable</span></dt><dd><p>Callback for calculating dx0 (make sure to pass dx0==0.0) to enable.
+Signature: <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">y[:])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code>.</p>
+</dd>
+<dt><strong>dx_max_cb: callable</strong></dt><dd><p>Callback for calculating dx_max. Signature: <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">y[:])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt>(xout, yout, info):</dt><dd><p>xout: 1-dimensional array of values for the independent variable
+yout: 2-dimensional array of the dependent variables (axis 1) for</p>
+<blockquote>
+<div><p>values corresponding to xout (axis 0)</p>
+</div></blockquote>
+<p>info: dictionary with information about the integration</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygslodeiv2.integrate_predefined">
+<code class="sig-prename descclassname">pygslodeiv2.</code><code class="sig-name descname">integrate_predefined</code><span class="sig-paren">(</span><em class="sig-param">rhs</em>, <em class="sig-param">jac</em>, <em class="sig-param">y0</em>, <em class="sig-param">xout</em>, <em class="sig-param">atol</em>, <em class="sig-param">rtol</em>, <em class="sig-param">dx0=0.0</em>, <em class="sig-param">dx_min=0.0</em>, <em class="sig-param">dx_max=0.0</em>, <em class="sig-param">method='bsimp'</em>, <em class="sig-param">nsteps=500</em>, <em class="sig-param">check_callable=False</em>, <em class="sig-param">check_indexing=False</em>, <em class="sig-param">autorestart=0</em>, <em class="sig-param">return_on_error=False</em>, <em class="sig-param">cb_kwargs=None</em>, <em class="sig-param">\*\*kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygslodeiv2.html#integrate_predefined"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygslodeiv2.integrate_predefined" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrates a system of ordinary differential equations (user chosen output).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>rhs</strong><span class="classifier">callable</span></dt><dd><p>Function with signature f(t, y, fout) which modifies fout <em>inplace</em>.</p>
+</dd>
+<dt><strong>jac</strong><span class="classifier">callable</span></dt><dd><p>Function with signature j(t, y, jmat_out, dfdx_out) which modifies
+jmat_out and dfdx_out <em>inplace</em>.</p>
+</dd>
+<dt><strong>y0</strong><span class="classifier">array_like</span></dt><dd><p>initial values of the dependent variables</p>
+</dd>
+<dt><strong>xout</strong><span class="classifier">array_like</span></dt><dd><p>values of the independent variable</p>
+</dd>
+<dt><strong>atol</strong><span class="classifier">float</span></dt><dd><p>absolute tolerance</p>
+</dd>
+<dt><strong>rtol</strong><span class="classifier">float</span></dt><dd><p>relative tolerance</p>
+</dd>
+<dt><strong>dx0</strong><span class="classifier">float</span></dt><dd><p>initial step-size</p>
+</dd>
+<dt><strong>dx_min</strong><span class="classifier">float</span></dt><dd><p>minimum step (default: 0.0)</p>
+</dd>
+<dt><strong>dx_max</strong><span class="classifier">float</span></dt><dd><p>maximum step (default: 0.0)</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><p>One of: ‘rk2’, ‘rk4’, ‘rkf45’, ‘rkck’, ‘rk8pd’, ‘rk1imp’,
+‘rk2imp’, ‘rk4imp’, ‘bsimp’, ‘msadams’, ‘msbdf’.</p>
+</dd>
+<dt><strong>nsteps</strong><span class="classifier">int</span></dt><dd><p>maximum number of steps (default: 500).</p>
+</dd>
+<dt><strong>check_callable</strong><span class="classifier">bool</span></dt><dd><p>perform signature sanity checks on <code class="docutils literal notranslate"><span class="pre">rhs</span></code> and <code class="docutils literal notranslate"><span class="pre">jac</span></code>.</p>
+</dd>
+<dt><strong>check_indexing</strong><span class="classifier">bool</span></dt><dd><p>perform item setting sanity checks on <code class="docutils literal notranslate"><span class="pre">rhs</span></code> and <code class="docutils literal notranslate"><span class="pre">jac</span></code>.</p>
+</dd>
+<dt><strong>autorestart</strong><span class="classifier">int</span></dt><dd><p>Autorestarts on error (requires autonomous system).</p>
+</dd>
+<dt><strong>return_on_error</strong><span class="classifier">bool</span></dt><dd><p>Instead of raising an exception return silently (see info[‘success’] &amp; info[‘nreached’]).</p>
+</dd>
+<dt><strong>record_rhs_xvals</strong><span class="classifier">bool</span></dt><dd><p>When True: will return x values for rhs calls in <code class="docutils literal notranslate"><span class="pre">info['rhs_xvals']</span></code>.</p>
+</dd>
+<dt><strong>record_jac_xvals</strong><span class="classifier">bool</span></dt><dd><p>When True will return x values for jac calls in <code class="docutils literal notranslate"><span class="pre">info['jac_xvals']</span></code>.</p>
+</dd>
+<dt><strong>record_order</strong><span class="classifier">bool</span></dt><dd><p>When True will return used time stepper order in <code class="docutils literal notranslate"><span class="pre">info['orders']</span></code>.</p>
+</dd>
+<dt><strong>record_fpe</strong><span class="classifier">bool</span></dt><dd><p>When True will return observed floating point errors in <code class="docutils literal notranslate"><span class="pre">info['fpes']</span></code>. (see <code class="docutils literal notranslate"><span class="pre">fpes</span></code>)</p>
+</dd>
+<dt><strong>cb_kwargs</strong><span class="classifier">dict</span></dt><dd><p>Extra keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">rhs</span></code> and <code class="docutils literal notranslate"><span class="pre">jac</span></code>.</p>
+</dd>
+<dt><strong>dx0cb</strong><span class="classifier">callable</span></dt><dd><p>Callback for calculating dx0 (make sure to pass dx0==0.0) to enable.
+Signature: <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">y[:])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code>.</p>
+</dd>
+<dt><strong>dx_max_cb: callable</strong></dt><dd><p>Callback for calculating dx_max. Signature: <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">y[:])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt>(result, info):</dt><dd><dl class="simple">
+<dt>result: 2-dimensional array of the dependent variables (axis 1) for</dt><dd><p>values corresponding to xout (axis 0)</p>
+</dd>
+</dl>
+<p>info: dictionary with information about the integration</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to pygslodeiv2’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Bjoern I. Dahlgren &lt;bjodah@gmail.com&gt;
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
