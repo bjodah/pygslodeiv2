@@ -69,7 +69,7 @@ Simplest way to install is to use the `conda package manager <http://conda.pydat
 
 ::
 
-   $ conda install -c bjodah pygslodeiv2 pytest
+   $ conda install -c conda-forge pygslodeiv2 pytest
    $ python -m pytest --pyargs pygslodeiv2
 
 tests should pass.
