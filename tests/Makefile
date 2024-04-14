@@ -37,14 +37,14 @@ endif
 	python3 ./_test_gsl_odeiv2_anyode.py
 
 clean:
-	rm catch.hpp
-	rm test_gsl_odeiv2_anyode
-	rm test_gsl_odeiv2_anyode_parallel
-	rm test_gsl_odeiv2_anyode_autorestart
-	rm test_gsl_odeiv2_cxx
+	rm -f doctest.h
+	rm -f test_gsl_odeiv2_anyode
+	rm -f test_gsl_odeiv2_anyode_parallel
+	rm -f test_gsl_odeiv2_anyode_autorestart
+	rm -f test_gsl_odeiv2_cxx
 
 
-test_%: test_%.cpp ../pygslodeiv2/include/gsl_odeiv2_cxx.hpp catch.hpp testing_utils.hpp
+test_%: test_%.cpp ../pygslodeiv2/include/gsl_odeiv2_cxx.hpp doctest.h testing_utils.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $@ $< $(LIBS)
 
 test_gsl_odeiv2_anyode_parallel: test_gsl_odeiv2_anyode_parallel.cpp ../pygslodeiv2/include/gsl_odeiv2_*.hpp
@@ -55,5 +55,5 @@ else
 	$(CXX) $(CXXFLAGS) $(OPENMP_FLAG) $(INCLUDE) -o $@ $< $(LIBS) $(OPENMP_LIB)
 endif
 
-catch.hpp: catch.hpp.bz2
+doctest.h: doctest.h.bz2
 	bunzip2 -k -f $<

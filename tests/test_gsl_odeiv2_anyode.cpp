@@ -1,11 +1,10 @@
-// C++11 source code.
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main()
-#include "catch.hpp"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 #include "gsl_odeiv2_anyode.hpp"
 #include "testing_utils.hpp"
 
 
-TEST_CASE( "decay_adaptive", "[simple_adaptive]" ) {
+TEST_CASE( "decay_adaptive" ) {
     Decay odesys(1.0);
     double y0 = 1.0;
     double dx0 = 1e-9;
@@ -26,7 +25,7 @@ TEST_CASE( "decay_adaptive", "[simple_adaptive]" ) {
 }
 
 
-TEST_CASE( "decay_adaptive_get_dx_max", "[simple_adaptive]" ) {
+TEST_CASE( "decay_adaptive_get_dx_max" ) {
     Decay odesys(1.0);
     double y0 = 1.0;
     double dx0 = 1e-9;
@@ -44,7 +43,7 @@ TEST_CASE( "decay_adaptive_get_dx_max", "[simple_adaptive]" ) {
 }
 
 
-TEST_CASE( "decay_adaptive_dx_max", "[simple_adaptive]" ) {
+TEST_CASE( "decay_adaptive_dx_max" ) {
     Decay odesys(1.0);
     double y0 = 1.0;
     double dx0 = 1e-9;

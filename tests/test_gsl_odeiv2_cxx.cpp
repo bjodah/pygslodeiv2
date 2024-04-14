@@ -1,11 +1,10 @@
-// C++11 source code.
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main()
-#include "catch.hpp"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 #include "gsl_odeiv2_cxx.hpp"
 #include "testing_utils.hpp"
 
 
-TEST_CASE( "methods", "[GSLIntegrator]" ) {
+TEST_CASE( "methods" ) {
     const int ny = 1;
     void * user_data = nullptr;
     double dx0 = 1e-12, atol=1e-8, rtol=1e-8;
@@ -26,7 +25,7 @@ double get_dx_max(double /* x */, const double * const /* y */){
     return 1e-3;
 }
 
-TEST_CASE( "adaptive", "[GSLIntegrator]" ) {
+TEST_CASE( "adaptive" ) {
     const int ny = 1;
     bool return_on_error = false;
     int autorestart = 0;
@@ -58,7 +57,7 @@ double get_dx_max2(double /* x */, const double * const /* y */){
     return 1e-3;
 }
 
-TEST_CASE( "predefined", "[GSLIntegrator]" ) {
+TEST_CASE( "predefined" ) {
     const int ny = 1;
     bool return_on_error = false;
     int autorestart = 0;
