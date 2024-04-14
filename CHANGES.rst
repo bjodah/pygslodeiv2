@@ -1,3 +1,7 @@
+v0.9.5
+======
+- update AnyODE (fix refcounting bug)
+
 v0.9.4
 ======
 - update AnyODE
