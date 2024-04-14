@@ -1,26 +1,17 @@
 pygslodeiv2
 ===========
 
-.. image:: http://hera.physchem.kth.se:9090/api/badges/bjodah/pygslodeiv2/status.svg
-   :target: http://hera.physchem.kth.se:9090/bjodah/pygslodeiv2
+.. image:: http://hackspett.bjodah.se/api/badges/5/status.svg
+   :target: http://hackspett.bjodah.se/repos/5
    :alt: Build status
-.. image:: https://circleci.com/gh/bjodah/pygslodeiv2.svg?style=svg
-   :target: https://circleci.com/gh/bjodah/pygslodeiv2
-   :alt: Build status on CircleCI
-.. image:: https://secure.travis-ci.org/bjodah/pygslodeiv2.svg?branch=master
-   :target: http://travis-ci.org/bjodah/pygslodeiv2
-   :alt: Build status on Travis-CI
 .. image:: https://img.shields.io/pypi/v/pygslodeiv2.svg
    :target: https://pypi.python.org/pypi/pygslodeiv2
    :alt: PyPI version
-.. image:: https://img.shields.io/badge/python-2.7,3.4,3.5-blue.svg
-   :target: https://www.python.org/
-   :alt: Python version
 .. image:: https://img.shields.io/pypi/l/pygslodeiv2.svg
    :target: https://github.com/bjodah/pygslodeiv2/blob/master/LICENSE
    :alt: License
-.. image:: http://hera.physchem.kth.se/~pygslodeiv2/branches/master/htmlcov/coverage.svg
-   :target: http://hera.physchem.kth.se/~pygslodeiv2/branches/master/htmlcov
+.. image:: http://artifacts.bjodah.se/pygslodeiv2/branches/master/htmlcov/coverage.svg
+   :target: http://artifacts.bjodah.se/pygslodeiv2/branches/master/htmlcov/
    :alt: coverage
 .. image:: https://zenodo.org/badge/41481237.svg
    :target: https://zenodo.org/badge/latestdoi/41481237
