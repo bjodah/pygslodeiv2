@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-
+import gc
 import os
+import sys
 import numpy as np
 import pytest
 
@@ -81,6 +82,7 @@ def test_integrate_adaptive(method, forgiveness):
             gc.collect()
             nNone1 = sys.getrefcount(None)
         xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
+    gc.collect()
     nNone2 = sys.getrefcount(None)
     assert -7 < (nNone2 - nNone1) < 7
 
