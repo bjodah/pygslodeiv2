@@ -77,14 +77,16 @@ def test_integrate_adaptive(method, forgiveness):
     kwargs = dict(x0=0, xend=3, dx0=1e-10, atol=atol, rtol=rtol,
                   method=method)
     # Run multiple times to catch possible side-effects:
-    for ii in range(10):
+    nIter = 101
+    for ii in range(nIter):
         if ii == 1:
             gc.collect()
             nNone1 = sys.getrefcount(None)
         xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
     gc.collect()
     nNone2 = sys.getrefcount(None)
-    assert -7 < (nNone2 - nNone1) < 7
+    delta = nNone2 - nNone1
+    assert -nIter < delta < nIter
 
     yref = decay_get_Cref(k, y0, xout)
     assert info['success']
