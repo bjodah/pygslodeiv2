@@ -75,9 +75,15 @@ def test_integrate_adaptive(method, forgiveness):
     atol, rtol = 1e-8, 1e-8
     kwargs = dict(x0=0, xend=3, dx0=1e-10, atol=atol, rtol=rtol,
                   method=method)
-    # Run twice to catch possible side-effects:
-    xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
-    xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
+    # Run multiple times to catch possible side-effects:
+    for ii in range(10):
+        if ii == 1:
+            gc.collect()
+            nNone1 = sys.getrefcount(None)
+        xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
+    nNone2 = sys.getrefcount(None)
+    assert -7 < (nNone2 - nNone1) < 7
+
     yref = decay_get_Cref(k, y0, xout)
     assert info['success']
     assert info['atol'] == atol and info['rtol'] == rtol
