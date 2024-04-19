@@ -9,6 +9,15 @@ from pygslodeiv2 import (
     integrate_adaptive, integrate_predefined, requires_jac
 )
 
+def _get_refcount_None():
+    if hasattr(sys, 'getrefcount'):
+        gc.collect()
+        gc.collect()
+        return sys.getrefcount(None)
+    else:  # e.g. pypy
+        return 0
+
+
 decay_defaults = dict(y0=[0.7, 0.3, 0.5],
                       xout=np.linspace(0, 3, 31),
                       dx0=1e-10, atol=1e-8, rtol=1e-8)
@@ -80,13 +89,12 @@ def test_integrate_adaptive(method, forgiveness):
     nIter = 101
     for ii in range(nIter):
         if ii == 1:
-            gc.collect()
-            nNone1 = sys.getrefcount(None)
+            nNone1 = _get_refcount_None()
         xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
     gc.collect()
-    nNone2 = sys.getrefcount(None)
+    nNone2 = _get_refcount_None()
     delta = nNone2 - nNone1
-    assert -nIter < delta < nIter
+    assert -nIter//10 < delta < nIter//10
 
     yref = decay_get_Cref(k, y0, xout)
     assert info['success']
