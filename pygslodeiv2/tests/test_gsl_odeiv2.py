@@ -1,12 +1,22 @@
 # -*- coding: utf-8 -*-
-
+import gc
 import os
+import sys
 import numpy as np
 import pytest
 
 from pygslodeiv2 import (
     integrate_adaptive, integrate_predefined, requires_jac
 )
+
+def _get_refcount_None():
+    if hasattr(sys, 'getrefcount'):
+        gc.collect()
+        gc.collect()
+        return sys.getrefcount(None)
+    else:  # e.g. pypy
+        return 0
+
 
 decay_defaults = dict(y0=[0.7, 0.3, 0.5],
                       xout=np.linspace(0, 3, 31),
@@ -75,9 +85,17 @@ def test_integrate_adaptive(method, forgiveness):
     atol, rtol = 1e-8, 1e-8
     kwargs = dict(x0=0, xend=3, dx0=1e-10, atol=atol, rtol=rtol,
                   method=method)
-    # Run twice to catch possible side-effects:
-    xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
-    xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
+    # Run multiple times to catch possible side-effects:
+    nIter = 101
+    for ii in range(nIter):
+        if ii == 1:
+            nNone1 = _get_refcount_None()
+        xout, yout, info = integrate_adaptive(f, j, y0, **kwargs)
+    gc.collect()
+    nNone2 = _get_refcount_None()
+    delta = nNone2 - nNone1
+    assert -nIter//10 < delta < nIter//10
+
     yref = decay_get_Cref(k, y0, xout)
     assert info['success']
     assert info['atol'] == atol and info['rtol'] == rtol
