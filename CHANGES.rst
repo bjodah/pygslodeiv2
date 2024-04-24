@@ -1,3 +1,7 @@
+v0.9.6
+======
+- Another bump on AnyODE
+
 v0.9.5
 ======
 - update AnyODE (fix refcounting bug)
