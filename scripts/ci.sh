@@ -9,7 +9,7 @@ PKG_NAME=${1:-${CI_REPO_NAME##*/}}
 source /opt-3/cpython-v3.11-apt-deb/bin/activate
 
 #################### Install and test python package  ####################
-
+pip install --upgrade numpy cython
 python3 setup.py sdist
 CC=gcc CXX=g++ python3 -m pip install --ignore-installed dist/*.tar.gz
 (cd /; python3 -m pytest --pyargs $PKG_NAME)
