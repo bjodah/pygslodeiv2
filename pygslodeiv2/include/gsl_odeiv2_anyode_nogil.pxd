@@ -22,7 +22,7 @@ cdef extern from "gsl_odeiv2_anyode.hpp" namespace "gsl_odeiv2_anyode":
         const double,
         int,
         bool
-    ) except + nogil
+    ) except+ nogil
 
     cdef void simple_predefined[U](
         U * const,
@@ -37,4 +37,4 @@ cdef extern from "gsl_odeiv2_anyode.hpp" namespace "gsl_odeiv2_anyode":
         const double,
         const double,
         const double
-    ) except + nogil
+    ) except+ nogil

@@ -9,7 +9,7 @@ cdef extern from "gsl_odeiv2_cxx.hpp" namespace "gsl_odeiv2_cxx":
     cdef cppclass StepType:
         pass
 
-    cdef StepType styp_from_name(string) except + nogil
+    cdef StepType styp_from_name(string) except+ nogil
     cdef bool requires_jacobian(StepType) nogil
 
 
