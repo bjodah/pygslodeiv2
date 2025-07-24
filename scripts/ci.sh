@@ -38,6 +38,8 @@ make CC=gcc CXX=g++ EXTRA_FLAGS=-DNDEBUG
 
 
 LLVM_ROOT=$(compgen -G "/opt-2/llvm-??")
+LLVM_LIB_DIR=$(compgen -G "${LLVM_ROOT}/lib/$(uname -m)-*")
+
 
 LIBCXX_ROOT=$(compgen -G "/opt-2/libcxx??-asan")
 make clean
@@ -46,7 +48,7 @@ make \
     EXTRA_FLAGS="-fsanitize=address -nostdinc++ -isystem ${LIBCXX_ROOT}/include/c++/v1" \
     LDFLAGS="-nostdlib++ -Wl,-rpath,${LIBCXX_ROOT}/lib -L${LIBCXX_ROOT}/lib" \
     LDLIBS="-lc++" \
-    OPENMP_LIB="-Wl,-rpath,${LLVM_ROOT}/lib -lomp" \
+    OPENMP_LIB="-Wl,-rpath,${LLVM_LIB_DIR} -lomp" \
     PY_LD_PRELOAD=$(clang++ --print-file-name=libclang_rt.asan.so)
 
 LIBCXX_ROOT=$(compgen -G "/opt-2/libcxx??-debug")
@@ -56,7 +58,7 @@ make \
     EXTRA_FLAGS="-fsanitize=address -nostdinc++ -isystem ${LIBCXX_ROOT}/include/c++/v1" \
     LDFLAGS="-nostdlib++ -Wl,-rpath,${LIBCXX_ROOT}/lib -L${LIBCXX_ROOT}/lib" \
     LDLIBS="-lc++" \
-    OPENMP_LIB="-Wl,-rpath,${LLVM_ROOT}/lib -lomp" \
+    OPENMP_LIB="-Wl,-rpath,${LLVM_LIB_DIR} -lomp" \
     PY_LD_PRELOAD=$(clang++ --print-file-name=libclang_rt.asan.so)
 
 cd -
