@@ -1,3 +1,7 @@
+v0.9.7
+======
+- update AnyODE (drop deprecated Py2 C-API calls)
+
 v0.9.6
 ======
 - Another bump on AnyODE
