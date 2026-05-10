@@ -14,13 +14,6 @@ import warnings
 
 from setuptools import setup
 from setuptools.extension import Extension
-try:
-    import cython
-except ImportError:
-    _HAVE_CYTHON = False
-else:
-    _HAVE_CYTHON = True
-    assert cython  # silence pep8
 
 
 pkg_name = 'pygslodeiv2'
@@ -40,7 +33,7 @@ for k, v in list(env.items()):
 
 
 _src = {ext: _path_under_setup(pkg_name, '_gsl_odeiv2.' + ext) for ext in "cpp pyx".split()}
-if _HAVE_CYTHON and os.path.exists(_src["pyx"]):
+if os.path.exists(_src["pyx"]):
     # Possible that a new release of Python needs a re-rendered Cython source,
     # or that we want to include possible bug-fix to Cython, disable by manually
     # deleting .pyx file from source distribution.
@@ -49,6 +42,9 @@ if _HAVE_CYTHON and os.path.exists(_src["pyx"]):
         os.unlink(_src['cpp'])  # ensure c++ source is re-generated.
 else:
     USE_CYTHON = False
+    if not os.path.exists(_src['cpp']):
+        raise RuntimeError("No .cpp file nor .pyx file, cannot build")
+
 
 package_include = os.path.join(pkg_name, 'include')
 
