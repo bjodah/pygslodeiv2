@@ -3,7 +3,7 @@ when:
 
 steps:
   - name: build-and-test
-    image: cont-reg.bjodah.se:443/bjodah/triceratops-3:59
+    image: cont-reg.bjodah.se:443/bjodah/triceratops-3:60
     environment:
       PYTHONMALLOC: malloc
     commands:
